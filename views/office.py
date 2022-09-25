@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from flask import render_template
+from flask import request, session, make_response, render_template
 from views import office_blue
 
 
 @office_blue.route('/')
 def root():
-    return render_template('/office.html')
+    rid = request.cookies.get('rid')
+    if not rid or rid not in session:
+        return make_response({'state': 'fail', 'msg': '请登录后操作'}, 401)
+    args = {
+        'rid': session[rid]['rid'],
+        'name': session[rid]['name'],
+    }
+    return render_template('/office.html', **args)

@@ -54,7 +54,7 @@ function login() {
             case '教务处':
                 window.location.href = '/office';
                 break;
-            case '考勤人员':
+            case '考勤':
                 window.location.href = '/attendance';
                 break;
             case '管理员':
@@ -247,7 +247,7 @@ $("#btnUserCenter").on("click", (function() {
         case '教务处':
             window.location.href = '/office';
             break;
-        case '考勤人员':
+        case '考勤':
             window.location.href = '/attendance';
             break;
         case '管理员':

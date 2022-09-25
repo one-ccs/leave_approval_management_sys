@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from flask import Flask, request, session, make_response, render_template, send_file
+from datetime import timedelta
 from urllib.parse import quote
 from classes import Database, Role
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=1800 + 3600 * 8)
 db = Database('./db/data.db')
 
 
@@ -48,7 +50,7 @@ def login():
                 session.permanent = True
                 res = make_response({'state': 'ok', 'msg': '登录成功'}, 200)
                 res.set_cookie('rid', str(result['rid']))
-                res.set_cookie('name', quote(result['name']))
+                # res.set_cookie('name', quote(result['name']))
                 res.set_cookie('role', quote(result['role']))
         else:
             res = make_response({'state': 'fail', 'msg': '不存在此用户'}, 403)
