@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    登录 / 注册
+{% endblock title %}
+
+{% block style %}
+    <style>
+        body {
+            background: #97CBFF
+        }
+        #btnLogin:hover {
+            color: black !important;
+            background-color: #00ff6e !important;
+        }
+        #backdrop-filter {
+            background-color: unset;
+            backdrop-filter: unset;
+        }
+    </style>
+{% endblock style %}
+
+{% block navbar %}
+    <nav class="navbar navbar-expand-md bg-primary navbar-dark px-3">
+        <ul class="navbar-nav flex flex-row justify-content-between w-100">
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center p-0" href="/">
+                    <img class="navbar-brand rounded-circle" width="32" src="{{ url_for('static', filename='img/logo.jpg') }}" alt="logo">
+                    <span class="navbar-brand navbar-text text-wrap">电气学院请假审批管理系统</span>
+                </a>
+            </li>
+            <li class="nav-item d-flex align-items-center">
+                <button id="btnUserCenter" class="btn btn-default me-2 py-1 navbar-text" type="button" style="display: none;">个人中心</button>
+                <button id="btnUser" class="btn btn-secondary px-5 text-nowrap" type="button" style="border: 1px solid #fff;display: none;">登录 / 注册</button>
+            </li>
+        </ul>
+    </nav>
+{% endblock navbar %}
+
+{% block body %}
+    <div class="container">
+        <div class="row mt-3 mt-lg-5 mt-md-3 mt-sm-0">
+            <div class="col h1 text-center mt-lg-5 mt-md-3">电气学院请假审批管理系统</div>
+        </div>
+        <div class="row mt-3 mt-lg-5 mt-md-3 mt-sm-0">
+            <div class="col"></div>
+            <div class="col-xxl-3 col-xl-4 col-lg-4 col-md-6 rounded" style="background-color: #ccccff; box-shadow: gray 3px 3px 8px;">
+                <div class="row bg-light rounded-top">
+                    <div class="col p-0">
+                        <button href="#" class="btn btn-light py-3 w-50 chooser" style="border: none;border-radius: 5px 0 0 0;font-size: 1.2rem;" onclick="$('#formLogin').show(),$('#formRegist').hide(),$('#formRegist').removeClass('was-validated')">登录</button>
+                        <button href="#" class="btn btn-light py-3 w-50 chooser float-end" style="border: none;border-radius: 0 5px 0 0;font-size: 1.2rem;" onclick="$('#formLogin').hide(),$('#formRegist').show(),$('#formLogin').removeClass('was-validated')">注册</button>
+                    </div>
+                </div>
+                <div id="formLogin" class="p-4">
+                    <div class="form-group">
+                        <label class="w-100" for="inputLoginRID">ID</label>
+                        <input type="text" class="form-control" id="inputLoginRID" placeholder="id 号" required>
+                        <div class="valid-feedback">验证成功！</div>
+                        <div class="invalid-feedback">请输入 ID 号！</div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label class="w-100" for="inputLoginPass">密码</label>
+                        <input type="password" class="form-control" id="inputLoginPass" placeholder="密码" required>
+                        <div class="valid-feedback">验证成功！</div>
+                        <div class="invalid-feedback">请输入密码！</div>
+                    </div>
+                    <button type="button" class="btn text-white w-100 mt-4" id="btnLogin" style="border: 1px solid #adadad;background-color: #00dd60;letter-spacing: 4px;">登录</button>
+                </div>
+                <div id="formRegist" class="p-4" style="display: none;">
+                    <div class="form-group">
+                        <label class="w-100" for="inputRegistRID">ID</label>
+                        <input type="text" class="form-control" id="inputRegistRID" placeholder="id 号" required>
+                        <div class="valid-feedback">验证成功！</div>
+                        <div class="invalid-feedback">请输入 ID 号！</div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label class="w-100" for="inputRegistName">姓名</label>
+                        <input type="text" class="form-control" id="inputRegistName" placeholder="姓名" required>
+                        <div class="valid-feedback">验证成功！</div>
+                        <div class="invalid-feedback">请输入姓名！</div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label class="w-100" for="inputRegistPass">密码</label>
+                        <input type="password" class="form-control" id="inputRegistPass" placeholder="密码" required>
+                        <div class="valid-feedback">验证成功！</div>
+                        <div class="invalid-feedback">请输入密码！</div>
+                    </div>
+                    <button type="button" class="btn text-white w-100 mt-4" id="btnRegist" style="border: 1px solid #adadad;background-color: #00dd60;letter-spacing: 4px;">注册</button>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+    </div>
+{% endblock body %}
