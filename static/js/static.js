@@ -267,7 +267,8 @@ $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disab
     let rid = getCookie('rid');
     let name = getCookie('name');
     if(rid && name) {
-        $('#btnUser').text(rid + ' ' + name).removeClass('btn-secondary').addClass('btn-success'),
+        let t = $('#btnUser').html().replace('登录 / 注册', rid + ' ' + name);
+        $('#btnUser').html(t).removeClass('btn-secondary').addClass('btn-success'),
         $('#btnUserCenter').show(),
         $('#btnUser').show();
     }
