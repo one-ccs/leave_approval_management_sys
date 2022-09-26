@@ -8,28 +8,10 @@
     <title>{% block title %}{% endblock title %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-confirm.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/static.css') }}">
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery-confirm.min.js') }}"></script>
-    <style>
-        body {
-            width: 100vw;
-            height: 100vh;
-            background-image: url("{{ url_for('static', filename='img/bg.jpg') }}");
-            background-size: cover;
-            background-position: center;
-        }
-        #backdrop-filter {
-            z-index: -1;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #333a;
-            backdrop-filter: blur(3px);
-        }
-    </style>
         {% block style %}
         {% endblock style %}
     {% endblock head %}

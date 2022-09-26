@@ -5,6 +5,18 @@ import sqlite3
 import random
 
 
+def random_telphone(count=11):
+    """
+        随机生成XX位的手机号码
+
+        :param count: 手机号长度，默认为11位
+        :return: phone_number  生成的手机号
+    """
+    str = ['139', '138', '137', '136', '135', '134', '159', '158', '157', '150', '151', '152', '188', '187', '182', '183', '184', '178', '130', '131', '132', '156', '155', '186', '185', '176', '133', '153', '189', '180', '181', '177']
+    str1 = '0123456789'
+    phone_number = random.choice(str)+''.join(random.choice(str1) for i in range(count-3))
+    return phone_number
+
 def random_name():
     # 删减部分小众姓氏
     firstName = "赵钱孙李周吴郑王冯陈褚卫蒋沈韩杨朱秦尤许何吕施张孔曹严华金魏陶姜戚谢邹喻水云苏潘葛奚范彭郎鲁韦昌马苗凤花方俞任袁柳鲍史唐费岑薛雷贺倪汤滕殷罗毕郝邬安常乐于时傅卞齐康伍余元卜顾孟平" \
@@ -46,7 +58,6 @@ def random_name():
         if random.choice(range(2)) > 0:
             name_1 = name[random.choice(range(len(name)))]
         return {'name': firstName_name + name_1 + boy_name, 'gender': '男'}
-
 
 def random_student(sid):
     t = random_name()
@@ -158,14 +169,19 @@ def create_student(connection, start_id, end_id):
 def main():
     connection = sqlite3.connect('./db/data.db')
     try:
-        # ~ # 生成辅导员信息
-        # ~ create_teacher(connection, 100000, 100040, '辅导员')
-        # ~ # 生成教务处信息
-        # ~ create_teacher(connection, 100041, 100060, '教务处')
-        # ~ # 生成考勤人员信息
-        # ~ create_teacher(connection, 100061, 100080, '考勤')
-        # 生成学生信息
-        create_student(connection, 2000001001, 2000001200)
+        # # 生成辅导员信息
+        # create_teacher(connection, 100000, 100040, '辅导员')
+        # # 生成教务处信息
+        # create_teacher(connection, 100041, 100060, '教务处')
+        # # 生成考勤人员信息
+        # create_teacher(connection, 100061, 100080, '考勤')
+        # # 生成学生信息
+        # create_student(connection, 2000001001, 2000001200)
+        tel = []
+        for id in range(100000, 100080):
+            tel.append((random_telphone(), id))
+        with connection:
+            connection.executemany('UPDATE teacher set telphone=? WHERE tid=?', tel)
     except Exception as e:
         print(e)
     finally:

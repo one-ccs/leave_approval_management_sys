@@ -77,7 +77,7 @@ function login() {
             theme: "bootstrap",
             type: "red",
             title: "提示",
-            content: '<span class="fileitemTr">' + 'ID 或密码错误，请重新输入' + "</span>",
+            content: '<span class="fileitemTr">' + msg + '，请重新输入' + "</span>",
             autoClose: "cancelAction|1200",
             buttons: {
                 cancelAction: {
@@ -254,7 +254,15 @@ $("#btnUserCenter").on("click", (function() {
             window.location.href = '/admin';
             break;
     }
-}));
+})),
+$('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disabled').on('click', function() {
+    let ancestry = this.parentNode.parentNode.parentNode;
+
+    $(this).siblings().filter('.page-item.active').removeClass('active'),
+    $(this).addClass('active'),
+    $(ancestry).children('.itemcard-page.active').removeClass('active'),
+    $(ancestry).children(`[data-itemcard-page="${this.getAttribute('data-itemcard-menu')}"]`).addClass('active');
+});
 (function() {
     let rid = getCookie('rid');
     let name = getCookie('name');

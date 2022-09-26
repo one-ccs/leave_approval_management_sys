@@ -23,20 +23,23 @@ def root():
 def _session():
     return render_template('/session.html')
 
-@app.route('/login', methods=['GET', 'POST', 'DELETE'])
+@app.route('/login', methods=['POST', 'DELETE'])
 def login():
     res = None
-    # 请求登录页
-    if request.method == 'GET':
-        return render_template('/login.html')
     # 登录
     if request.method == 'POST':
-        role = None
+        result, role, rid, password = None, None, request.form.get('rid'), request.form.get('password')
         try:
-            role = Role('None', request.form.get('password'), request.form.get('rid'), '学生')
+            role = Role('None', password, rid, '学生')
         except ValueError:
-            return make_response({'state': 'fail', 'msg': '学号和密码不能为空'}, 403)
-        result = db.execute('SELECT * FROM role WHERE rid=?', (role.rid, ))
+            return make_response({'state': 'fail', 'msg': 'ID 和密码不能为空'}, 403)
+        _rid = int(rid)
+        if _rid < 100000:
+            result = db.execute('SELECT rid,password,role,name FROM role,admin WHERE rid=? and rid=aid', (role.rid, ))
+        elif _rid >= 100000 and _rid <= 199999:
+            result = db.execute('SELECT rid,password,role,name FROM role,teacher WHERE rid=? and rid=tid', (role.rid, ))
+        elif _rid >= 2000000000 and _rid <= 2999999999:
+            result = db.execute('SELECT rid,password,role,name FROM role,student WHERE rid=? and rid=sid', (role.rid, ))
         if result and len(result) > 0:
             result = result[0]
             if not role.check_password(result['password']):
@@ -46,11 +49,12 @@ def login():
                     'rid': result['rid'],
                     'name': result['name'],
                     'password': result['password'],
-                    'role': result['role']}
+                    'role': result['role']
+                }
                 session.permanent = True
                 res = make_response({'state': 'ok', 'msg': '登录成功'}, 200)
                 res.set_cookie('rid', str(result['rid']))
-                # res.set_cookie('name', quote(result['name']))
+                res.set_cookie('name', quote(result['name']))
                 res.set_cookie('role', quote(result['role']))
         else:
             res = make_response({'state': 'fail', 'msg': '不存在此用户'}, 403)
@@ -67,17 +71,15 @@ def login():
             res.delete_cookie('role')
     return res
 
-@app.route('/regist', methods=['GET', 'POST'])
+@app.route('/regist', methods=['POST'])
 def regist():
     res = None
-    if request.method == 'GET':
-        return render_template('/regist.html')
     if request.method == 'POST':
         role = None
         try:
             role = Role(request.form.get('username'), request.form.get('password'), request.form.get('rid'), '学生')
         except ValueError:
-            return make_response({'state': 'fail', 'msg': '学号、姓名和密码不能为空'}, 403)
+            return make_response({'state': 'fail', 'msg': 'ID 、姓名和密码不能为空'}, 403)
         result = db.execute(
             'INSERT INTO role(rid,name,password,role) VALUES(?,?,?,?)',
             (role.rid, role.name, role.hash_password, role.role)
@@ -85,7 +87,7 @@ def regist():
         if result and result > 0:
             res = make_response({'state': 'ok', 'msg': '注册成功'}, 200)
         else:
-            res = make_response({'state': 'fail', 'msg': '注册失败, 学号已存在, 请修改后重试'}, 403)
+            res = make_response({'state': 'fail', 'msg': '注册失败, ID 已存在, 请修改后重试'}, 403)
     return res
 
 

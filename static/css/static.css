@@ -1,0 +1,40 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    background-image: url(/static/img/bg.jpg);
+    background-size: cover;
+    background-position: center;
+}
+#backdrop-filter {
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #333a;
+    backdrop-filter: blur(3px);
+}
+.itemcard {
+    display: flex;
+    flex-direction: column;
+    padding: 50px 30px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+.itemcard-menu {
+    width: 100%;
+}
+.itemcard-page {
+    display: none;
+    flex-grow: 1;
+    border-radius: 5px;
+    padding: 9px;
+    width: 100%;
+    height: 100%;
+    background-color: #fffc;
+}
+.itemcard-page.active {
+    display: block;
+}
