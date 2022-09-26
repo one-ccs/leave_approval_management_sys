@@ -1,13 +1,15 @@
 body {
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     background-image: url(/static/img/bg.jpg);
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 #backdrop-filter {
     z-index: -1;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;

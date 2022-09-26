@@ -7,13 +7,17 @@ from classes import Database
 db = Database('./db/data.db')
 
 
-@student_blue.route('/')
-def root():
+@student_blue.before_request
+def check_login():
     rid = request.cookies.get('rid')
     if not rid or rid not in session:
         return make_response({'state': 'fail', 'msg': '请登录后操作'}, 401)
     if session.get(rid)['role'] != '学生':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
+
+@student_blue.route('/')
+def root():
+    rid = request.cookies.get('rid')
     args = {}
     result = db.execute('SELECT * FROM student WHERE sid=?', (rid, ))
     if result and len(result) > 0:

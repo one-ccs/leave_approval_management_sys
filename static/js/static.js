@@ -262,8 +262,8 @@ $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disab
     $(this).addClass('active'),
     $(ancestry).children('.itemcard-page.active').removeClass('active'),
     $(ancestry).children(`[data-itemcard-page="${this.getAttribute('data-itemcard-menu')}"]`).addClass('active');
-});
-(function() {
+}),
+$(document).ready(function() {
     let rid = getCookie('rid');
     let name = getCookie('name');
     if(rid && name) {
@@ -272,4 +272,4 @@ $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disab
         $('#btnUserCenter').show(),
         $('#btnUser').show();
     }
-})();
+});

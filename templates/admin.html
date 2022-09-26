@@ -9,10 +9,18 @@
         <div class="itemcard">
             <div class="itemcard-menu">
                 <ul class="pagination">
-                    <li data-itemcard-menu="1" class="page-item active"><a href="#" class="page-link"><i class="fa fa-address-card me-2"></i>用户信息</a></li>
-                    <li data-itemcard-menu="2" class="page-item"><a href="#" class="page-link"><i class="fa fa-sitemap me-2"></i>学生管理</a></li>
-                    <li data-itemcard-menu="3" class="page-item"><a href="#" class="page-link"><i class="fa fa-sitemap me-2"></i>教师管理</a></li>
-                    <li data-itemcard-menu="4" class="page-item"><a href="#" class="page-link"><i class="fa fa-cogs"></i>设置</a></li>
+                    <li data-itemcard-menu="1" class="page-item active">
+                        <button type="button" class="page-link"><i class="fa fa-address-card me-2"></i>用户信息</button>
+                    </li>
+                    <li data-itemcard-menu="2" class="page-item">
+                        <button type="button" class="page-link"><i class="fa fa-sitemap me-2"></i>学生管理</button>
+                    </li>
+                    <li data-itemcard-menu="3" class="page-item">
+                        <button type="button" class="page-link"><i class="fa fa-sitemap me-2"></i>教师管理</button>
+                    </li>
+                    <li data-itemcard-menu="4" class="page-item">
+                        <button type="button" class="page-link"><i class="fa fa-cogs"></i>设置</button>
+                    </li>
                 </ul>
             </div>
             <div data-itemcard-page="1" class="itemcard-page active">
@@ -36,7 +44,18 @@
                 </div>
             </div>
             <div data-itemcard-page="2" class="itemcard-page">
-                page2
+                <div class="container">
+                    <div class="row mt-2">
+                        <table id="table1" class="col table table-striped table-bordered m-0" border="1" style="table-layout: fixed;">
+                            <thead>
+                                <tr><th>序号</th><th>学号</th><th>姓名</th><th>性别</th><th>学部</th><th>系别</th><th>专业</th><th>班级</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             <div data-itemcard-page="3" class="itemcard-page">
                 page3
@@ -47,3 +66,55 @@
         </div>
     </div>
 {% endblock body %}
+
+{% block script %}
+    <script>
+        let table1 = null;
+        $('[data-itemcard-menu="2"]').on('click', () => {
+            if(!table1) {
+                table1 = $('#table1').dataTable({
+                    language: {
+                        url: '/static/localisation/zh_CN.json'
+                    },
+                    columns: [
+                        {'data': 'on'},
+                        {'data': 'sid'},
+                        {'data': 'name'},
+                        {'data': 'gender'},
+                        {'data': 'department'},
+                        {'data': 'faculty'},
+                        {'data': 'major'},
+                        {'data': 'class'},
+                    ],
+                    ajax: '/admin/students'
+                });
+            }
+            else {
+                
+            }
+            // $.ajax({
+            //     type: 'get',
+            //     url: '/admin/students'
+            // }).done((data) => {
+            //     $('#table1').dataTable({
+            //         language: {
+            //             url: '/static/localisation/zh_CN.json'
+            //         },
+            //         // data: data.list,
+            //         columns: [
+            //             {'data': 'sid'},
+            //             {'data': 'name'},
+            //             {'data': 'gender'},
+            //             {'data': 'department'},
+            //             {'data': 'faculty'},
+            //             {'data': 'major'},
+            //             {'data': 'class'},
+            //         ],
+            //         ajax: '/admin/students'
+            //     });
+            // }).fail((data) => {
+            //     console.log(data.msg);
+            // });
+        });
+    </script>
+{% endblock %}
