@@ -63,6 +63,7 @@ def leaves():
                     'a1': row['a1'],
                     'a2': row['a2'],
                     'state': row['state'],
+                    'action': '<button class="btn btn-danger btn-sm me-1" onclick="onBtnRevokeClick(this)"><i class="fa fa-close"></i></button>',
                 })
             res = make_response(dict, 200)
         else:
@@ -74,6 +75,8 @@ def leaves():
         reason = request.form.get('reason')
         if not category or not start_datetime or not end_datetime:
             return make_response({'state': 'fial', 'msg': '申请失败, 类别、开始日期和结束日期不能为空'}, 403)
+        start_datetime = start_datetime.replace('T', ' ') + ':00'
+        end_datetime = end_datetime.replace('T', ' ') + ':00'
         result = db.execute(
             'INSERT INTO leave(sid,state,category,start_datetime,end_datetime,reason) VALUES(?,?,?,?,?,?)',
             (sid, '待审批', category, start_datetime, end_datetime, reason)
@@ -83,5 +86,12 @@ def leaves():
         else:
             res = make_response({'state': 'fail', 'msg': '申请失败'}, 403)
     if request.method == 'DELETE':
-        res = make_response({'state': 'ok', 'msg': '撤销成功'}, 200)
+        id = request.form.get('id')
+        if not id:
+            return make_response({'state': 'fail', 'msg': '操作失败'}, 403)
+        result = db.execute('DELETE FROM leave WHERE id=?', (id, ))
+        if result and result > 0:
+            res = make_response({'state': 'ok', 'msg': '撤销成功'}, 200)
+        else:
+            res = make_response({'state': 'fail', 'msg': '撤销失败'}, 403)
     return res

@@ -85,8 +85,8 @@
         $('[data-itemcard-menu="2"]').on('click', () => {
             if(!table1) {
                 table1 = $('#table1').dataTable({
-                    "processing": true,
-                    "stateSave": true,
+                    processing: true,
+                    stateSave: true,
                     language: {
                         url: '/static/localisation/zh_CN.json'
                     },
@@ -102,12 +102,12 @@
                     ],
                     columnDefs: [
                         {'width': '5%', 'targets': 0},
-                        {'width': '15%', 'targets': 1},
-                        {'width': '10%', 'targets': 2},
+                        {'width': '10%', 'targets': 1},
+                        {'width': '6%', 'targets': 2},
                         {'width': '5%', 'targets': 3},
-                        {'width': '18%', 'targets': 4},
-                        {'width': '22%', 'targets': 5},
-                        {'width': '20%', 'targets': 6},
+                        {'width': '16%', 'targets': 4},
+                        {'width': '30%', 'targets': 5},
+                        {'width': '23%', 'targets': 6},
                         {'width': '5%', 'targets': 7},
                     ],
                     ajax: '/admin/students'

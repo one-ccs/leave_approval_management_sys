@@ -7,6 +7,37 @@ function getCookie(name)
     else 
         return null; 
 }
+function dialog_warning(msg) {
+    return $.confirm({
+        theme: "bootstrap",
+        type: "red",
+        title: "提示",
+        content: '<span class="fileitemTr">' + msg + "</span>",
+        autoClose: "cancelAction|1200",
+        typeAnimated: !0,
+        buttons: {
+            cancelAction: {
+                text: '关闭',
+                action: function() {}
+            }
+        }
+    });
+}
+function dialog_error(msg) {
+    return $.confirm({
+        theme: "bootstrap",
+        type: "red",
+        title: "",
+        content: '<span class="fileitemTr">' + msg + "</span>",
+        autoClose: "cancelAction|2000",
+        buttons: {
+            cancelAction: {
+                text: '关闭',
+                action: function() {}
+            }
+        }
+    });
+}
 function login() {
     $('#formLogin').addClass('was-validated');
     let rid = $("#inputLoginRID").val(), password = $("#inputLoginPass").val();
@@ -273,3 +304,63 @@ $(document).ready(function() {
         $('#btnUser').show();
     }
 });
+function onBtnRevokeClick(self) {
+    let ancestry = self.parentNode.parentNode;
+    if(!ancestry) {
+        return dialog_error('操作失败，请联系管理员！');
+    }
+    let lid = $(ancestry).children().first().text();
+    if(!lid) {
+        return dialog_error('操作失败，请联系管理员！');
+    }
+    $.confirm({
+        title: "确认",
+        content: '<span class="fileitemTr">' + "确定撤销申请吗?" + "</span>",
+        theme: "bootstrap",
+        type: "red",
+        buttons: {
+            confirm: {
+                text: "确认",
+                btnClass: "btn-red",
+                action: () => {
+                    let form = new FormData();
+                    form.append('id', lid);
+                    $.ajax({
+                        async: !1,
+                        crossDomain: !0,
+                        url: "/student/leaves",
+                        method: "DELETE",
+                        headers: {
+                            "cache-control": "no-cache"
+                        },
+                        processData: !1,
+                        contentType: !1,
+                        mimeType: "multipart/form-data",
+                        data: form
+                    }).done((function(data) {
+                        $('[data-itemcard-menu="2"]').click();
+                    }
+                    )).fail((function(jqXHR) {
+                        dialog_error(jqXHR.msg);
+                    }))
+                }
+            },
+            cancel: {
+                text: '取消',
+                action: function() {}
+            }
+        }
+    });
+}
+function onBtnBrowseClick(self) {
+    
+}
+function onBtnRejectClick(self) {
+
+}
+function onBtnAgreeClick(self) {
+
+}
+function onBtnReportClick(self) {
+
+}
