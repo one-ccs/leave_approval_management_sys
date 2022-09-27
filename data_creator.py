@@ -126,12 +126,15 @@ def random_student(sid):
 
     return (sid, name, gender, department, faculty, major, _class)
 
+def random_leave(sid):
+    state = random.choice(('待审批', '已撤回', '审批中', '已驳回', '待销假', '已完成'))
+    return (sid, state)
 
-def create_teacher(connection, start_id, end_id, role):
-    if start_id < 100000 or end_id > 199999:
+def create_teacher(connection, start_tid, end_tid, role):
+    if start_tid < 100000 or end_tid > 199999:
         raise ValueError('教师编号 [100000, 199999]')
 
-    for id in range(start_id, end_id):
+    for id in range(start_tid, end_tid):
         user = random_name()
         user['id'] = id
         user['password'] = generate_password_hash('1')
@@ -147,12 +150,12 @@ def create_teacher(connection, start_id, end_id, role):
                 (user['id'], user['password'], role)
             )
 
-def create_student(connection, start_id, end_id):
-    if start_id < 2000000000 or end_id > 2999999999:
+def create_student(connection, start_sid, end_sid):
+    if start_sid < 2000000000 or end_sid > 2999999999:
         raise ValueError('学生编号 [2000000000, 2999999999]')
 
     stu = role = []
-    for id in range(start_id, end_id):
+    for id in range(start_sid, end_sid):
         s = random_student(id)
         stu.append(s)
         role.append((s[0], generate_password_hash('1'), '学生'))
@@ -166,6 +169,28 @@ def create_student(connection, start_id, end_id):
             'INSERT INTO role(rid,password,role) VALUES(?,?,?)', role
         )
 
+def create_leave(connection, start_sid, end_sid):
+    return
+    if start_sid < 2000000000 or end_sid > 2999999999:
+        raise ValueError('学生编号 [2000000000, 2999999999]')
+    leaves = []
+    for id in range(start_sid, end_sid):
+        leave = random_leave(id)
+        leaves.append()
+    with connection:
+        connection.executemany(
+            'INSERT INTO leave(sid,state,category,apply_datetime,start_datetime,end_datetime,reason) VALUES(?,?,?,?,?,?,?)',
+            leaves
+        )
+
+def update_telphone(connection, start_tid, end_tid):
+    tel = []
+    for id in range(start_tid, end_tid):
+        tel.append((random_telphone(), id))
+    with connection:
+        connection.executemany('UPDATE teacher set telphone=? WHERE tid=?', tel)
+
+
 def main():
     connection = sqlite3.connect('./db/data.db')
     try:
@@ -177,11 +202,10 @@ def main():
         # create_teacher(connection, 100061, 100080, '考勤')
         # # 生成学生信息
         # create_student(connection, 2000001001, 2000001200)
-        tel = []
-        for id in range(100000, 100080):
-            tel.append((random_telphone(), id))
-        with connection:
-            connection.executemany('UPDATE teacher set telphone=? WHERE tid=?', tel)
+        # 生成请假条信息
+        create_leave(connection, 2000000000, 2000001000)
+        # # 更新教师电话号码
+        # update_telphone(connection, 100000, 100080)
     except Exception as e:
         print(e)
     finally:

@@ -38,9 +38,7 @@ def root():
 def students():
     res = None
     result = db.execute('SELECT row_number() OVER(ORDER BY sid ASC) as "on",* FROM student')
-
     if result and len(result) > 0:
-
         dict = {
             'state': 'ok',
             'msg': '查询成功',
@@ -57,6 +55,31 @@ def students():
                 'faculty': row['faculty'],
                 'major': row['major'],
                 'class': row['class']
+            })
+        res = make_response(dict, 200)
+    else:
+        res =make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+    return res
+
+@admin_blue.route('/teachers', methods=['GET'])
+def teachers():
+    res = None
+    result = db.execute('SELECT row_number() OVER(ORDER BY tid ASC) as "on",teacher.*,role.role FROM teacher,role where teacher.tid=role.rid')
+    if result and len(result) > 0:
+        dict = {
+            'state': 'ok',
+            'msg': '查询成功',
+            'length': len(result),
+            'data': []
+        }
+        for row in result:
+            dict['data'].append({
+                'on': row['on'],
+                'tid': row['tid'],
+                'name': row['name'],
+                'gender': row['gender'],
+                'telphone': row['telphone'],
+                'role': row['role'],
             })
         res = make_response(dict, 200)
     else:

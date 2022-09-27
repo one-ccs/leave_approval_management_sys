@@ -10,16 +10,16 @@
             <div class="itemcard-menu">
                 <ul class="pagination">
                     <li data-itemcard-menu="1" class="page-item active">
-                        <button type="button" class="page-link"><i class="fa fa-address-card me-2"></i>用户信息</button>
+                        <button class="page-link"><i class="fa fa-address-card me-2"></i>用户信息</button>
                     </li>
                     <li data-itemcard-menu="2" class="page-item">
-                        <button type="button" class="page-link"><i class="fa fa-sitemap me-2"></i>学生管理</button>
+                        <button class="page-link"><i class="fa fa-sitemap me-2"></i>学生管理</button>
                     </li>
                     <li data-itemcard-menu="3" class="page-item">
-                        <button type="button" class="page-link"><i class="fa fa-sitemap me-2"></i>教师管理</button>
+                        <button class="page-link"><i class="fa fa-sitemap me-2"></i>教师管理</button>
                     </li>
-                    <li data-itemcard-menu="4" class="page-item">
-                        <button type="button" class="page-link"><i class="fa fa-cogs"></i>设置</button>
+                    <li data-itemcard-menu="4" class="page-item disabled">
+                        <button class="page-link"><i class="fa fa-cogs"></i>设置</button>
                     </li>
                 </ul>
             </div>
@@ -46,7 +46,7 @@
             <div data-itemcard-page="2" class="itemcard-page">
                 <div class="container">
                     <div class="row mt-2">
-                        <table id="table1" class="col table table-striped table-bordered m-0" border="1" style="table-layout: fixed;">
+                        <table id="table1" class="col table table-striped table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
                             <thead>
                                 <tr><th>序号</th><th>学号</th><th>姓名</th><th>性别</th><th>学部</th><th>系别</th><th>专业</th><th>班级</th></tr>
                             </thead>
@@ -58,10 +58,21 @@
                 </div>
             </div>
             <div data-itemcard-page="3" class="itemcard-page">
-                page3
+                <div class="container">
+                    <div class="row mt-2">
+                        <table id="table2" class="col table table-striped table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
+                            <thead>
+                                <tr><th>序号</th><th>ID</th><th>姓名</th><th>性别</th><th>电话号码</th><th>职能</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             <div data-itemcard-page="4" class="itemcard-page">
-                page4
+                设置
             </div>
         </div>
     </div>
@@ -69,10 +80,13 @@
 
 {% block script %}
     <script>
-        let table1 = null;
+        let table1 = table2 = null;
+        $.fn.dataTable.ext.errMode = 'throw';
         $('[data-itemcard-menu="2"]').on('click', () => {
             if(!table1) {
                 table1 = $('#table1').dataTable({
+                    "processing": true,
+                    "stateSave": true,
                     language: {
                         url: '/static/localisation/zh_CN.json'
                     },
@@ -86,35 +100,44 @@
                         {'data': 'major'},
                         {'data': 'class'},
                     ],
+                    columnDefs: [
+                        {'width': '5%', 'targets': 0},
+                        {'width': '15%', 'targets': 1},
+                        {'width': '10%', 'targets': 2},
+                        {'width': '5%', 'targets': 3},
+                        {'width': '18%', 'targets': 4},
+                        {'width': '22%', 'targets': 5},
+                        {'width': '20%', 'targets': 6},
+                        {'width': '5%', 'targets': 7},
+                    ],
                     ajax: '/admin/students'
                 });
             }
-            else {
-                
+            else {}
+        });
+        $('[data-itemcard-menu="3"]').on('click', () => {
+            if(!table2) {
+                table2 = $('#table2').dataTable({
+                    "processing": true,
+                    "stateSave": true,
+                    language: {
+                        url: '/static/localisation/zh_CN.json'
+                    },
+                    columns: [
+                        {'data': 'on'},
+                        {'data': 'tid'},
+                        {'data': 'name'},
+                        {'data': 'gender'},
+                        {'data': 'telphone'},
+                        {'data': 'role'},
+                    ],
+                    columnDefs: [
+                        {'width': '5%', 'targets': 0},
+                    ],
+                    ajax: '/admin/teachers'
+                });
             }
-            // $.ajax({
-            //     type: 'get',
-            //     url: '/admin/students'
-            // }).done((data) => {
-            //     $('#table1').dataTable({
-            //         language: {
-            //             url: '/static/localisation/zh_CN.json'
-            //         },
-            //         // data: data.list,
-            //         columns: [
-            //             {'data': 'sid'},
-            //             {'data': 'name'},
-            //             {'data': 'gender'},
-            //             {'data': 'department'},
-            //             {'data': 'faculty'},
-            //             {'data': 'major'},
-            //             {'data': 'class'},
-            //         ],
-            //         ajax: '/admin/students'
-            //     });
-            // }).fail((data) => {
-            //     console.log(data.msg);
-            // });
+            else {}
         });
     </script>
 {% endblock %}

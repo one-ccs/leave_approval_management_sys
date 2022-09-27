@@ -29,6 +29,8 @@ class Database:
                     result = connection.execute(sql, args).rowcount
         except sqlite3.IntegrityError:
             result = None
+        except sqlite3.Error as e:
+            raise e
         finally:
             connection.close()
         return result

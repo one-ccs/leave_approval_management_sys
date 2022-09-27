@@ -4,14 +4,22 @@
     学生 - {{ rid }} {{ name }}
 {% endblock title %}
 
+{% block style %}
+    <style>
+        .modal-backdrop.show {
+            display: unset !important;
+        }
+    </style>
+{% endblock style %}
+
 {% block body %}
-    <div class="container d-flex align-items-center" style="height: calc(100% - 62px);">
+    <div class="container-fluid d-flex align-items-center" style="width: 88%;height: calc(100% - 62px);">
         <div class="itemcard">
             <div class="itemcard-menu">
                 <ul class="pagination">
-                    <li data-itemcard-menu="1" class="page-item active"><button type="button" class="page-link"><i class="fa fa-address-card me-2"></i>用户信息</button></li>
-                    <li data-itemcard-menu="2" class="page-item"><button type="button" class="page-link"><i class="fa fa-plus-square me-2"></i>请假</button></li>
-                    <li data-itemcard-menu="3" class="page-item disabled"><button type="button" class="page-link"><i class="fa fa-cogs me-2"></i>设置</button></li>
+                    <li data-itemcard-menu="1" class="page-item active"><button class="page-link"><i class="fa fa-address-card me-2"></i>用户信息</button></li>
+                    <li data-itemcard-menu="2" class="page-item"><button class="page-link"><i class="fa fa-plus-square me-2"></i>请假</button></li>
+                    <li data-itemcard-menu="3" class="page-item disabled"><button class="page-link"><i class="fa fa-cogs me-2"></i>设置</button></li>
                 </ul>
             </div>
             <div data-itemcard-page="1" class="itemcard-page active">
@@ -36,33 +44,183 @@
                 </div>
             </div>
             <div data-itemcard-page="2" class="itemcard-page">
-                <div class="container">
+                <div class="container-fluid">
                     <div class="row pb-2" style="border-bottom: 1px solid black;">
                         <div class="col">
-                            <button class="btn btn-primary" type="button">新建申请<i class="fa fa-plus-circle ms-2"></i></button>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFormModal">新建申请<i class="fa fa-plus-circle ms-2"></i></button>
                         </div>
                     </div>
                     <div class="row mt-2">
-                        <table id="table1" class="col table table-striped table-bordered m-0" style="table-layout: fixed;">
+                        <table id="table1" class="table table-striped table-bordered m-0" style="table-layout: fixed;">
                             <thead>
-                                <tr><th>序号</th><th>申请日期</th><th>类别</th><th>开始日期</th><th>结束日期</th><th>辅导员审批</th><th>教务处审批</th><th>状态</th><th>操作</th></tr>
+                                <tr><th style="width: 55px;">编号</th><th class="col-2">申请日期</th><th>类别</th><th class="col-2">开始日期</th><th class="col-2">结束日期</th><th>原因</th><th>辅导员</th><th>教务处</th><th>状态</th><th style="width: 125px;">操作</th></tr>
                             </thead>
-                            <tbody>
-                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                                <tr><td>3</td><td>sdf</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                                <tr><td>2</td><td>-</td><td>-</td><td>asdf</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                                <tr><td>1</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                                <tr><td>4</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                                <tr><td>5</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                                <tr><td>1</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                            </tbody>
                         </table>
+                        <ul id="leaveList" class="list-group">
+                            <li class="list-group-item"><div class="d-flex align-items-center"><div style="width: 50px;">-</div><div class="col col-2">-</div><div class="col">-</div><div class="col col-2">-</div><div class="col col-2">-</div><div class="col">-</div><div class="col">-</div><div class="col">-</div><div class="col">-</div><div class="col"><div class="row"><button class="col btn btn-danger btn-sm me-1 disabled"><i class="fa fa-close"></i></button></div></div></div></li>
+                        </ul>
                     </div>
                 </div>
             </div>
             <div data-itemcard-page="3" class="itemcard-page">
-
+                设置
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addFormModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">新建请假申请</div>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addForm" class="container rounded mx-auto">
+                        <div class="form-floating">
+                            <select class="form-select" id="inputCategory">
+                                <option value="事假">事假</option>
+                                <option value="公假">公假</option>
+                                <option value="病假">病假</option>
+                                <option value="出校申请">出校申请</option>
+                            </select>
+                            <label class="form-label float-start" for="inputCategory">类别</label>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <input class="form-control" type="datetime-local" id="inputStartDatatime">
+                            <label class="form-label" for="inputStartDatatime">开始日期</label>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <input class="form-control" type="datetime-local" id="inputEndDatetime">
+                            <label class="form-label" for="inputEndDatetime">结束日期</label>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <textarea class="form-control h-25" id="inputReason"></textarea>
+                            <label class="form-label" for="inputReason">原因</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                    <button class="btn btn-primary" id="btnSubmit">提交</button>
+                </div>
             </div>
         </div>
     </div>
 {% endblock body %}
+
+{% block script %}
+    <script>
+        $('[data-itemcard-menu="2"]').on('click', function() {
+            $.ajax({
+                type: 'get',
+                url: '/student/leaves'
+            }).done(function(data) {
+                let html = ''
+                for(row of data.data) {
+                    html += `<li class="list-group-item"><div class="d-flex align-items-center"><div style="width: 50px;">${row['id']}</div><div class="col col-2">${row['apply_datetime']}</div><div class="col">${row['category']}</div><div class="col col-2">${row['start_datetime']}</div><div class="col col-2">${row['end_datetime']}</div><div class="col">${row['reason']}</div><div class="col">${row['a1']}</div><div class="col">${row['a2']}</div><div class="col">${row['state']}</div><div class="col"><div class="row"><button class="col btn btn-danger btn-sm me-1"><i class="fa fa-reply"></i></button></div></div></div></li>`;
+                }
+                $('#leaveList').html(html),
+                $('#leaveList > li > div > div > div > button.col.btn.btn-danger.btn-sm.me-1').not('button.disabled').on('click', function() {
+                    let ancestry = this.parentNode.parentNode.parentNode;
+                    let lid = $(ancestry).children().first().text();
+                    $.confirm({
+                        title: "确认",
+                        content: '<span class="fileitemTr">' + "确定撤销申请吗?" + "</span>",
+                        theme: "bootstrap",
+                        type: "red",
+                        buttons: {
+                            confirm: {
+                                text: "确认",
+                                btnClass: "btn-red",
+                                action: () => {
+                                    let settings = {
+                                        url: "/student/leaves",
+                                        method: "DELETE",
+                                    };
+                                    $.ajax(settings).done(((data) => {
+                                        // window.location.href = '/';
+                                    }
+                                    )).fail((function(jqXHR) {
+                                        $.confirm({
+                                            theme: "bootstrap",
+                                            type: "red",
+                                            title: "",
+                                            content: '<span class="fileitemTr">' + '操作失败，请联系管理员' + "</span>",
+                                            autoClose: "cancelAction|2000",
+                                            buttons: {
+                                                cancelAction: {
+                                                    text: '关闭',
+                                                    action: function() {}
+                                                }
+                                            }
+                                        });
+                                    }))
+                                }
+                            },
+                            cancel: {
+                                text: '取消',
+                                action: function() {}
+                            }
+                        }
+                    })
+                });
+            }).fail(function(data) {
+                console.log(data.msg);
+            });
+        }),
+        $('#btnSubmit').on('click', function() {
+            let category = $('#inputCategory').val(), sd = $('#inputStartDatatime').val(), ed = $('#inputEndDatetime').val(), reason = $('#inputReason').val();
+            if(!category || !sd || !ed) {
+                return $.confirm({
+                    theme: "bootstrap",
+                    type: "red",
+                    title: "提示",
+                    content: '<span class="fileitemTr">' + '类别、开始日期和结束日期不能为空！' + "</span>",
+                    autoClose: "cancelAction|1200",
+                    typeAnimated: !0,
+                    buttons: {
+                        cancelAction: {
+                            text: '关闭',
+                            action: function() {}
+                        }
+                    }
+                });
+            }
+            let form = new FormData();
+            form.append('category', category),
+            form.append('start_datetime', sd),
+            form.append('end_datetime', ed),
+            form.append('reason', reason);
+            $.ajax({
+                async: !1,
+                crossDomain: !0,
+                type: 'post',
+                url: '/student/leaves',
+                headers: {
+                    "cache-control": "no-cache"
+                },
+                processData: !1,
+                contentType: !1,
+                mimeType: "multipart/form-data",
+                data: form
+            }).done(() => {
+                $(this).siblings().first().click(),
+                $('[data-itemcard-menu="2"]').click();
+            }).fail(function(data) {
+                $.confirm({
+                    theme: "bootstrap",
+                    type: "red",
+                    title: "",
+                    content: '<span class="fileitemTr">' + '操作失败，请联系管理员' + "</span>",
+                    autoClose: "cancelAction|2000",
+                    buttons: {
+                        cancelAction: {
+                            text: '关闭',
+                            action: function() {}
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
