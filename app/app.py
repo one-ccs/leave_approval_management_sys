@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from flask import Flask, request, session, make_response, render_template, send_file
+from flask import Flask, request, session, make_response, render_template, send_file, url_for
 from datetime import timedelta
 from urllib.parse import quote
 from app.classes import Database, Role
@@ -13,7 +13,7 @@ db = Database('./db/data.db')
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_file('static/favicon.ico', mimetype='image/jpeg')
+    return send_file('../www/static/favicon.ico', mimetype='image/jpeg')
 
 @app.route('/')
 def root():
@@ -23,23 +23,29 @@ def root():
 def _session():
     return render_template('/session.html')
 
-@app.route('/login', methods=['POST', 'DELETE'])
+@app.route('/login', methods=['GET', 'POST', 'DELETE'])
 def login():
     res = None
+    if request.method == 'GET':
+        return render_template('/login.html')
     # 登录
     if request.method == 'POST':
         result, role, rid, password = None, None, request.form.get('rid'), request.form.get('password')
         try:
-            role = Role('None', password, rid, '学生')
+            _role = db.execute('SELECT * FROM role WHERE rid=?', (rid, ))
+            role = Role('None', password, rid, _role[0]['role'])
         except ValueError:
             return make_response({'state': 'fail', 'msg': 'ID 和密码不能为空'}, 403)
-        _rid = int(rid)
-        if _rid < 100000:
+        except IndexError:
+            return make_response({'state': 'fail', 'msg': '不存在此用户'}, 403)
+        if role.role == '管理员':
             result = db.execute('SELECT rid,password,role,name FROM role,admin WHERE rid=? and rid=aid', (role.rid, ))
-        elif _rid >= 100000 and _rid <= 199999:
+        elif role.role in ('辅导员', '教务处', '考勤'):
             result = db.execute('SELECT rid,password,role,name FROM role,teacher WHERE rid=? and rid=tid', (role.rid, ))
-        elif _rid >= 2000000000 and _rid <= 2999999999:
+        elif role.role == '学生':
             result = db.execute('SELECT rid,password,role,name FROM role,student WHERE rid=? and rid=sid', (role.rid, ))
+        else:
+            res = make_response({'state': 'fail', 'msg': '不存在此用户'}, 403)
         if result and len(result) > 0:
             result = result[0]
             if not role.check_password(result['password']):
@@ -57,7 +63,7 @@ def login():
                 res.set_cookie('name', quote(result['name']))
                 res.set_cookie('role', quote(result['role']))
         else:
-            res = make_response({'state': 'fail', 'msg': '不存在此用户'}, 403)
+            res = make_response({'state': 'fail', 'msg': '用户信息查询失败, 请联系管理员'}, 500)
     # 登出
     if request.method == 'DELETE':
         rid = request.cookies.get('rid')
@@ -71,21 +77,30 @@ def login():
             res.delete_cookie('role')
     return res
 
-@app.route('/regist', methods=['POST'])
+@app.route('/regist', methods=['GET', 'POST'])
 def regist():
     res = None
+    if request.method == 'GET':
+        return render_template('/regist.html')
     if request.method == 'POST':
         role = None
         try:
             role = Role(request.form.get('username'), request.form.get('password'), request.form.get('rid'), '学生')
         except ValueError:
             return make_response({'state': 'fail', 'msg': 'ID 、姓名和密码不能为空'}, 403)
-        result = db.execute(
-            'INSERT INTO role(rid,name,password,role) VALUES(?,?,?,?)',
-            (role.rid, role.name, role.hash_password, role.role)
+        result1 = db.execute(
+            'INSERT INTO role(rid,password,role) VALUES(?,?,?)',
+            (role.rid, role.hash_password, role.role)
         )
-        if result and result > 0:
-            res = make_response({'state': 'ok', 'msg': '注册成功'}, 200)
+        if result1 and result1 > 0:
+            result2 = db.execute(
+                'INSERT INTO student(sid,name) VALUES(?,?)',
+                (role.rid, role.name)
+            )
+            if result2 and result2 > 0:
+                res = make_response({'state': 'ok', 'msg': '注册成功'}, 200)
+            else:
+                res = make_response({'state': 'fail', 'msg': '注册失败, ID 已存在, 请修改后重试'}, 403)
         else:
             res = make_response({'state': 'fail', 'msg': '注册失败, ID 已存在, 请修改后重试'}, 403)
     return res
@@ -104,7 +119,3 @@ app.register_blueprint(assistant_blue)
 app.register_blueprint(office_blue)
 app.register_blueprint(attendance_blue)
 app.register_blueprint(admin_blue)
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9527, debug=True)

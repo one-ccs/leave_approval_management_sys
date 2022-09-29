@@ -7,33 +7,66 @@ function getCookie(name)
     else 
         return null; 
 }
-function dialog_warning(msg) {
+function dialog_info(msg, callback=function(){}) {
     return $.confirm({
-        theme: "bootstrap",
-        type: "red",
         title: "提示",
         content: '<span class="fileitemTr">' + msg + "</span>",
-        autoClose: "cancelAction|1200",
-        typeAnimated: !0,
+        theme: "bootstrap",
+        type: "green",
+        autoClose: "cancelAction|800",
         buttons: {
             cancelAction: {
-                text: '关闭',
-                action: function() {}
+                text: '确定',
+                action: callback
             }
         }
     });
 }
-function dialog_error(msg) {
+function dialog_warning(msg, callback=function(){}) {
     return $.confirm({
+        title: "警告",
+        content: '<span class="fileitemTr">' + msg + "</span>",
+        theme: "bootstrap",
+        type: "orange",
+        autoClose: "cancelAction|1200",
+        buttons: {
+            cancelAction: {
+                text: '确定',
+                action: callback
+            }
+        }
+    });
+}
+function dialog_error(msg, callback=function(){}) {
+    return $.confirm({
+        title: "错误",
+        content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "red",
-        title: "",
-        content: '<span class="fileitemTr">' + msg + "</span>",
         autoClose: "cancelAction|2000",
         buttons: {
             cancelAction: {
-                text: '关闭',
-                action: function() {}
+                text: '确定',
+                action: callback
+            }
+        }
+    });
+}
+function dialog_confirm(msg, confirm=function(){}, cancel=function(){}) {
+    $.confirm({
+        title: "消息",
+        content: '<span class="fileitemTr">' + msg + "</span>",
+        theme: "bootstrap",
+        type: "red",
+        buttons: {
+            confirm: {
+                text: "确认",
+                btnClass: "btn-red",
+                action: confirm
+            },
+            cancel: {
+                text: '取消',
+                action: cancel
             }
         }
     });
@@ -42,20 +75,7 @@ function login() {
     $('#formLogin').addClass('was-validated');
     let rid = $("#inputLoginRID").val(), password = $("#inputLoginPass").val();
     if (!rid || !password) {
-        return $.confirm({
-            theme: "bootstrap",
-            type: "red",
-            title: "提示",
-            content: '<span class="fileitemTr">' + 'ID 和密码不能为空！' + "</span>",
-            autoClose: "cancelAction|1200",
-            typeAnimated: !0,
-            buttons: {
-                cancelAction: {
-                    text: '关闭',
-                    action: function() {}
-                }
-            }
-        })
+        return dialog_warning('ID 和密码不能为空！');
     }
     let form = new FormData();
     form.append("rid", rid),
@@ -104,39 +124,44 @@ function login() {
                 $("#inputLoginRID").val('');
                 break;
         }
-        $.confirm({
-            theme: "bootstrap",
-            type: "red",
-            title: "提示",
-            content: '<span class="fileitemTr">' + msg + '，请重新输入' + "</span>",
-            autoClose: "cancelAction|1200",
-            buttons: {
-                cancelAction: {
-                    text: '关闭',
-                    action: function() {}
-                }
-            }
-        })
+        dialog_warning(msg);
     }));
+}
+function logoff() {
+    $.confirm({
+        title: "登出",
+        content: '<span class="fileitemTr">' + "确定退出登录?" + "</span>",
+        theme: "bootstrap",
+        type: "red",
+        buttons: {
+            confirm: {
+                text: "确认",
+                btnClass: "btn-red",
+                action: () => {
+                    $.ajax({
+                        url: "/login",
+                        method: "DELETE",
+                    }).done(((data) => {
+                        dialog_info('登出成功, 即将返回首页...', function() {
+                            window.location.href = '/';
+                        });
+                    })).fail((function(jqXHR) {
+                        dialog_error(JSON.parse(jqXHR.responseText).msg);
+                    }));
+                }
+            },
+            cancel: {
+                text: '取消',
+                action: function() {}
+            }
+        }
+    });
 }
 function regist() {
     $('#formRegist').addClass('was-validated');
     let rid = $('#inputRegistRID').val(), username = $("#inputRegistName").val(), password = $("#inputRegistPass").val();
     if (!rid || !username || !password) {
-        return $.confirm({
-            theme: "bootstrap",
-            type: "red",
-            title: "提示",
-            content: '<span class="fileitemTr">' + 'ID、姓名和密码不能为空！' + "</span>",
-            autoClose: "cancelAction|1200",
-            typeAnimated: !0,
-            buttons: {
-                cancelAction: {
-                    text: '关闭',
-                    action: function() {}
-                }
-            }
-        })
+        return dialog_warning('ID、姓名和密码不能为空！');
     }
     let form = new FormData();
     form.append("rid", rid),
@@ -156,95 +181,27 @@ function regist() {
         data: form
     };
     $.ajax(settings).done((function(data) {
-        $.confirm({
-            theme: "bootstrap",
-            type: "green",
-            title: "提示",
-            content: '<span class="fileitemTr">' + '注册成功, 请重新登录！' + "</span>",
-            autoClose: "cancelAction|800",
-            typeAnimated: !0,
-            buttons: {
-                cancelAction: {
-                    text: '确定',
-                    action: function() {}
-                }
-            }
+        dialog_info('注册成功, 请重新登录！', function() {
+            $("#inputLoginRID").val(rid),
+            $("#inputLoginPass").val(password),
+            $('body > div > div.row > div > div.row > div > button:nth-child(1)').click();
         });
-        $("#inputLoginRID").val(rid),
-        $("#inputLoginPass").val(password),
-        $('body > div > div.row > div > div.row > div > button:nth-child(1)').click();
     })).fail((function(jqXHR) {
-        401 === jqXHR.status ? (!0) : $.confirm({
-            theme: "bootstrap",
-            type: "red",
-            title: "提示",
-            content: '<span class="fileitemTr">' + 'ID 已存在, 请修改后重试!' + "</span>",
-            autoClose: "cancelAction|2000",
-            buttons: {
-                cancelAction: {
-                    text: '确定',
-                    action: function() {}
-                }
-            }
-        }),
+        dialog_warning('ID 已存在, 请修改后重试!'),
         $('#formRegist > div:nth-child(1) > div.invalid-feedback').text('ID 已存在, 请修改后重试！'),
         $('#inputRegistRID').val(''),
         $('#inputRegistRID').focus()
     }))
 }
-$("#btnUser").on("click", (function() {
-    $("#btnUser").text() === '登录 / 注册' ? (
-        window.location.href = '/session'
-    ): $.confirm({
-        title: "确认",
-        content: '<span class="fileitemTr">' + "确定退出登录?" + "</span>",
-        theme: "bootstrap",
-        type: "red",
-        buttons: {
-            confirm: {
-                text: "确认",
-                btnClass: "btn-red",
-                action: () => {
-                    let settings = {
-                        async: !1,
-                        crossDomain: !0,
-                        url: "/login",
-                        method: "DELETE",
-                        headers: {
-                            "cache-control": "no-cache"
-                        },
-                        processData: !1,
-                        contentType: !1,
-                        mimeType: "multipart/form-data"
-                    };
-                    $.ajax(settings).done(((data) => {
-                        window.location.href = '/';
-                    }
-                    )).fail((function(jqXHR) {
-                        $.confirm({
-                            theme: "bootstrap",
-                            type: "red",
-                            title: "",
-                            content: '<span class="fileitemTr">' + '操作失败，请联系管理员' + "</span>",
-                            autoClose: "cancelAction|2000",
-                            buttons: {
-                                cancelAction: {
-                                    text: '关闭',
-                                    action: function() {}
-                                }
-                            }
-                        })
-                    }
-                    ))
-                }
-            },
-            cancel: {
-                text: '取消',
-                action: function() {}
-            }
-        }
-    })
-})),
+
+$('#btnUserLR').on('click', function() {
+    if($(this).text() === '登录 / 注册' || !getCookie('name')) {
+        window.location.href = '/session';
+    }
+    else {
+        logoff();
+    }
+}),
 $("#inputLoginRID").on("keypress", (function(event) {
     13 === event.keyCode && $("#inputLoginPass").focus();
 })),
@@ -298,13 +255,18 @@ $(document).ready(function() {
     let rid = getCookie('rid');
     let name = getCookie('name');
     if(rid && name) {
-        let t = $('#btnUser').html().replace('登录 / 注册', rid + ' ' + name);
-        $('#btnUser').html(t).removeClass('btn-secondary').addClass('btn-success'),
-        $('#btnUserCenter').show(),
-        $('#btnUser').show();
+        $('#btnUserLR').html('<i class="fa fa-user-circle me-2"></i>' + rid + ' ' + name),
+        $('#btnUserLR').removeClass('btn-secondary').addClass('btn-success');
+        switch(window.location.pathname) {
+            case '/':
+            case '/login':
+            case '/regist':
+                $('#btnUserCenter').show();
+                break;
+        }
     }
 });
-function onBtnRevokeClick(self) {
+function btnRevokeClick(self) {
     let ancestry = self.parentNode.parentNode;
     if(!ancestry) {
         return dialog_error('操作失败，请联系管理员！');
@@ -313,54 +275,130 @@ function onBtnRevokeClick(self) {
     if(!lid) {
         return dialog_error('操作失败，请联系管理员！');
     }
-    $.confirm({
-        title: "确认",
-        content: '<span class="fileitemTr">' + "确定撤销申请吗?" + "</span>",
-        theme: "bootstrap",
-        type: "red",
-        buttons: {
-            confirm: {
-                text: "确认",
-                btnClass: "btn-red",
-                action: () => {
-                    let form = new FormData();
-                    form.append('id', lid);
-                    $.ajax({
-                        async: !1,
-                        crossDomain: !0,
-                        url: "/student/leaves",
-                        method: "DELETE",
-                        headers: {
-                            "cache-control": "no-cache"
-                        },
-                        processData: !1,
-                        contentType: !1,
-                        mimeType: "multipart/form-data",
-                        data: form
-                    }).done((function(data) {
-                        $('[data-itemcard-menu="2"]').click();
-                    }
-                    )).fail((function(jqXHR) {
-                        dialog_error(jqXHR.msg);
-                    }))
-                }
-            },
-            cancel: {
-                text: '取消',
-                action: function() {}
-            }
-        }
+    dialog_confirm("确定撤销申请吗?", () => {
+        let form = new FormData();
+        form.append('id', lid);
+        $.ajax({
+            url: "/student/leaves",
+            method: "DELETE",
+            mimeType: "multipart/form-data",
+            data: form
+        }).done((function(data) {
+            $('[data-itemcard-menu="2"]').click();
+        })).fail((function(jqXHR) {
+            dialog_error(JSON.parse(jqXHR.responseText).msg);
+        }));
     });
 }
-function onBtnBrowseClick(self) {
+function btnBrowseClick(self) {
     
 }
-function onBtnRejectClick(self) {
+function btnRejectClick(self) {
 
 }
-function onBtnAgreeClick(self) {
+function btnAgreeClick(self) {
 
 }
-function onBtnReportClick(self) {
+function btnReportClick(self) {
 
+}
+function btnModifyStudentClick(self) {
+    let dsid = $(self).attr('data-sid');
+    let row = null;
+    for(_row of studentTable.get(0).rows) {
+        if($(_row.cells.item(1)).text() === dsid) {
+            row = _row;
+            break;
+        }
+    }
+    if(row) {
+        document.forms.modifyStudentForm['sid'].value        = $(row.cells.item(1)).text();
+        document.forms.modifyStudentForm['name'].value       = $(row.cells.item(2)).text();
+        document.forms.modifyStudentForm['gender'].value     = $(row.cells.item(3)).text();
+        document.forms.modifyStudentForm['department'].value = $(row.cells.item(4)).text();
+        document.forms.modifyStudentForm['faculty'].value    = $(row.cells.item(5)).text();
+        document.forms.modifyStudentForm['major'].value      = $(row.cells.item(6)).text();
+        document.forms.modifyStudentForm['class'].value      = $(row.cells.item(7)).text();
+    }
+}
+function btnModifyStudentSubmitClick(self) {
+    let sid = document.forms.modifyStudentForm['sid'].value;
+    let name = document.forms.modifyStudentForm['name'].value;
+    let gend = document.forms.modifyStudentForm['gender'].value;
+    let depa = document.forms.modifyStudentForm['department'].value;
+    let facu = document.forms.modifyStudentForm['faculty'].value;
+    let majo = document.forms.modifyStudentForm['major'].value;
+    let clas = document.forms.modifyStudentForm['class'].value;
+
+    let form = new FormData();
+    form.append('sid', sid);
+    form.append('name', name);
+    form.append('gender', gend);
+    form.append('department', depa);
+    form.append('faculty', facu);
+    form.append('major', majo);
+    form.append('class', clas);
+    $.ajax({
+        async: !1,
+        crossDomain: !0,
+        url: "/admin/students",
+        method: "POST",
+        headers: {
+            "cache-control": "no-cache"
+        },
+        processData: !1,
+        contentType: !1,
+        mimeType: "multipart/form-data",
+        data: form
+    }).done((function(data) {
+        dialog_info('修改成功, 请刷新页面查看');
+    })).fail((function(jqXHR) {
+        dialog_error(JSON.parse(jqXHR.responseText).msg);
+    }));
+}
+function btnModifyTeacherClick(self) {
+    let dtid = $(self).attr('data-tid');
+    let row = null;
+    for(_row of teacherTable.get(0).rows) {
+        if($(_row.cells.item(1)).text() === dtid) {
+            row = _row;
+            break;
+        }
+    }
+    if(row) {
+        document.forms.modifyTeacherForm['tid'].value      = $(row.cells.item(1)).text();
+        document.forms.modifyTeacherForm['name'].value     = $(row.cells.item(2)).text();
+        document.forms.modifyTeacherForm['gender'].value   = $(row.cells.item(3)).text();
+        document.forms.modifyTeacherForm['telphone'].value = $(row.cells.item(4)).text();
+        document.forms.modifyTeacherForm['role'].value     = $(row.cells.item(5)).text();
+    }
+}
+function btnModifyTeacherSubmitClick(self) {
+    let ancestry = self.parentNode.parentNode;
+    if(!ancestry) {
+        return dialog_error('操作失败，请联系管理员！');
+    }
+    let tid = $(ancestry).children().first().text();
+    if(!tid) {
+        return dialog_error('操作失败，请联系管理员！');
+    }
+    let form = new FormData();
+    form.append('id', tid);
+    $.ajax({
+        async: !1,
+        crossDomain: !0,
+        url: "/admin/teachers",
+        method: "POST",
+        headers: {
+            "cache-control": "no-cache"
+        },
+        processData: !1,
+        contentType: !1,
+        mimeType: "multipart/form-data",
+        data: form
+    }).done((function(data) {
+        dialog_info('修改成功, 请刷新页面查看');
+    })).fail((function(jqXHR) {
+        dialog_error(JSON.parse(jqXHR.responseText).msg);
+    }));
 }

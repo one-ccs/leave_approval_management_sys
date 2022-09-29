@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from flask import request, session, make_response, render_template
 from app.views import admin_blue
-from app.classes import Database
+from app.classes import Database, Student
 
 db = Database('./db/data.db')
 
@@ -34,54 +34,79 @@ def root():
         }
     return render_template('/admin.html', **args)
 
-@admin_blue.route('/students', methods=['GET'])
+@admin_blue.route('/students', methods=['GET', 'POST', 'DELETE'])
 def students():
     res = None
-    result = db.execute('SELECT row_number() OVER(ORDER BY sid ASC) as "on",* FROM student')
-    if result and len(result) > 0:
-        dict = {
-            'state': 'ok',
-            'msg': '查询成功',
-            'length': len(result),
-            'data': []
-        }
-        for row in result:
-            dict['data'].append({
-                'on': row['on'],
-                'sid': row['sid'],
-                'name': row['name'],
-                'gender': row['gender'],
-                'department': row['department'],
-                'faculty': row['faculty'],
-                'major': row['major'],
-                'class': row['class']
-            })
-        res = make_response(dict, 200)
-    else:
-        res =make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+    if request.method == 'GET':
+        result = db.execute('SELECT row_number() OVER(ORDER BY sid ASC) as "on",* FROM student')
+        if result and len(result) > 0:
+            dict = {
+                'state': 'ok',
+                'msg': '查询成功',
+                'length': len(result),
+                'data': []
+            }
+            for row in result:
+                dict['data'].append({
+                    'on': row['on'],
+                    'sid': row['sid'],
+                    'name': row['name'],
+                    'gender': row['gender'],
+                    'department': row['department'],
+                    'faculty': row['faculty'],
+                    'major': row['major'],
+                    'class': row['class'],
+                    'action': f'''<button class="btn btn-warning btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" data-sid="{row['sid']}" onclick="btnModifyStudentClick(this)"><i class="fa fa-pencil-square-o"></i></button>''',
+                })
+            res = make_response(dict, 200)
+        else:
+            res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+    if request.method == 'POST':
+        res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
+    if request.method == 'DELETE':
+        sid = request.form.get('sid')
+        name = request.form.get('name')
+        gend = request.form.get('gender')
+        depa = request.form.get('department')
+        facu = request.form.get('faculty')
+        majo = request.form.get('major')
+        clas = request.form.get('class')
+        try:
+            stu = Student(name, 'None', sid, gend, depa, facu, majo, clas)
+            stu.id = session.get(stu.sid)['id']
+        except ValueError:
+            return make_response({'state': 'fail', 'msg': '学号和姓名不能为空'}, 403)
+        result = db.execute()
+        res = make_response({'state': 'fail', 'msg': '删除失败'}, 403)
     return res
 
-@admin_blue.route('/teachers', methods=['GET'])
+@admin_blue.route('/teachers', methods=['GET', 'POST', 'DELETE'])
 def teachers():
     res = None
-    result = db.execute('SELECT row_number() OVER(ORDER BY tid ASC) as "on",teacher.*,role.role FROM teacher,role where teacher.tid=role.rid')
-    if result and len(result) > 0:
-        dict = {
-            'state': 'ok',
-            'msg': '查询成功',
-            'length': len(result),
-            'data': []
-        }
-        for row in result:
-            dict['data'].append({
-                'on': row['on'],
-                'tid': row['tid'],
-                'name': row['name'],
-                'gender': row['gender'],
-                'telphone': row['telphone'],
-                'role': row['role'],
-            })
-        res = make_response(dict, 200)
-    else:
-        res =make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+    if request.method == 'GET':
+        result = db.execute('SELECT row_number() OVER(ORDER BY tid ASC) as "on",teacher.*,role.role FROM teacher,role where teacher.tid=role.rid')
+        if result and len(result) > 0:
+            dict = {
+                'state': 'ok',
+                'msg': '查询成功',
+                'length': len(result),
+                'data': []
+            }
+            for row in result:
+                dict['data'].append({
+                    'on': row['on'],
+                    'tid': row['tid'],
+                    'name': row['name'],
+                    'gender': row['gender'],
+                    'telphone': row['telphone'],
+                    'role': row['role'],
+                    'action': f'''<button class="btn btn-warning btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" data-tid="{row['tid']}" onclick="btnModifyTeacherClick(this)"><i class="fa fa-pencil-square-o"></i></button>''',
+                })
+            res = make_response(dict, 200)
+        else:
+            res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+    if request.method == 'POST':
+        res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
+    if request.method == 'DELETE':
+        res = make_response({'state': 'fail', 'msg': '删除失败'}, 403)
     return res

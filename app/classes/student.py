@@ -4,9 +4,10 @@ from app.classes import User
 
 
 class Student(User):
-    def __init__(self, name, password, sid, gender='', department='', faculty='', major='', _class=''):
+    def __init__(self, name, password, sid, tid='', gender='', department='', faculty='', major='', _class=''):
         super().__init__(name, password)
         self.__sid = sid
+        self.tid= tid
         self.gender = gender
         self.department = department
         self.faculty = faculty

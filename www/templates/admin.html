@@ -5,7 +5,7 @@
 {% endblock title %}
 
 {% block body %}
-    <div class="container d-flex align-items-center" style="height: calc(100% - 62px);">
+    <div class="container-fluid d-flex align-items-center" style="width: 70%;height: calc(100% - 62px);">
         <div class="itemcard">
             <div class="itemcard-menu">
                 <ul class="pagination">
@@ -46,12 +46,12 @@
             <div data-itemcard-page="2" class="itemcard-page">
                 <div class="container">
                     <div class="row mt-2">
-                        <table id="table1" class="col table table-striped table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
+                        <table id="studentTable" class="col table table-striped table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
                             <thead>
-                                <tr><th>序号</th><th>学号</th><th>姓名</th><th>性别</th><th>学部</th><th>系别</th><th>专业</th><th>班级</th></tr>
+                                <tr><th>序号</th><th>学号</th><th>姓名</th><th>性别</th><th>学部</th><th>系别</th><th>专业</th><th>班级</th><th>操作</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td><button class="btn btn-warning btn-sm me-1 disabled"><i class="fa fa-pencil-square-o"></i></button></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -60,12 +60,12 @@
             <div data-itemcard-page="3" class="itemcard-page">
                 <div class="container">
                     <div class="row mt-2">
-                        <table id="table2" class="col table table-striped table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
+                        <table id="teacherTable" class="col table table-striped table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
                             <thead>
-                                <tr><th>序号</th><th>ID</th><th>姓名</th><th>性别</th><th>电话号码</th><th>职能</th></tr>
+                                <tr><th>序号</th><th>ID</th><th>姓名</th><th>性别</th><th>电话号码</th><th>职能</th><th>操作</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td><button class="btn btn-warning btn-sm me-1 disabled"><i class="fa fa-pencil-square-o"></i></button></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -76,15 +76,116 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modifyStudentModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">修改学生信息</div>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="modifyStudentForm" class="container rounded mx-auto">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-floating">
+                                    <input class="form-control" type="text" name="sid">
+                                    <label class="form-label float-start" for="sid">学号</label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating">
+                                    <input class="form-control" type="text" name="name">
+                                    <label class="form-label" for="name">姓名</label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating">
+                                    <input class="form-control" type="text" name="gender">
+                                    <label class="form-label" for="gender">性别</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <input class="form-control" type="text" name="department">
+                            <label class="form-label" for="department">学部</label>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <input class="form-control" type="text" name="faculty">
+                            <label class="form-label" for="faculty">系别</label>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <input class="form-control" type="text" name="major">
+                            <label class="form-label" for="major">专业</label>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <input class="form-control" type="text" name="class">
+                            <label class="form-label" for="class">班级</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                    <button class="btn btn-primary" onclick="btnModifyStudentSubmitClick()">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modifyTeacherModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">修改教师信息</div>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="modifyTeacherForm" class="container rounded mx-auto">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-floating mt-3">
+                                    <input class="form-control" type="text" name="tid">
+                                    <label class="form-label" for="tid">ID</label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating mt-3">
+                                    <input class="form-control" type="text" name="name">
+                                    <label class="form-label" for="name">姓名</label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating mt-3">
+                                    <input class="form-control" type="text" name="gender">
+                                    <label class="form-label" for="gender">性别</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <input class="form-control" type="text" name="telphone">
+                            <label class="form-label" for="telphone">电话号码</label>
+                        </div>
+                        <div class="form-floating mt-3">
+                            <input class="form-control" type="text" name="role">
+                            <label class="form-label" for="role">职能</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                    <button class="btn btn-primary" onclick="btnModifyTeacherSubmitClick()">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock body %}
 
 {% block script %}
     <script>
-        let table1 = table2 = null;
+        let studentTable = teacherTable = null;
         $.fn.dataTable.ext.errMode = 'throw';
         $('[data-itemcard-menu="2"]').on('click', () => {
-            if(!table1) {
-                table1 = $('#table1').dataTable({
+            if(!studentTable) {
+                studentTable = $('#studentTable').dataTable({
                     processing: true,
                     stateSave: true,
                     language: {
@@ -99,6 +200,7 @@
                         {'data': 'faculty'},
                         {'data': 'major'},
                         {'data': 'class'},
+                        {'data': 'action'},
                     ],
                     columnDefs: [
                         {'width': '5%', 'targets': 0},
@@ -106,9 +208,10 @@
                         {'width': '6%', 'targets': 2},
                         {'width': '5%', 'targets': 3},
                         {'width': '16%', 'targets': 4},
-                        {'width': '30%', 'targets': 5},
+                        {'width': '25%', 'targets': 5},
                         {'width': '23%', 'targets': 6},
                         {'width': '5%', 'targets': 7},
+                        {'width': '5%', 'targets': 8},
                     ],
                     ajax: '/admin/students'
                 });
@@ -116,8 +219,8 @@
             else {}
         });
         $('[data-itemcard-menu="3"]').on('click', () => {
-            if(!table2) {
-                table2 = $('#table2').dataTable({
+            if(!teacherTable) {
+                teacherTable = $('#teacherTable').dataTable({
                     "processing": true,
                     "stateSave": true,
                     language: {
@@ -130,9 +233,11 @@
                         {'data': 'gender'},
                         {'data': 'telphone'},
                         {'data': 'role'},
+                        {'data': 'action'},
                     ],
                     columnDefs: [
                         {'width': '5%', 'targets': 0},
+                        {'width': '5%', 'targets': 6},
                     ],
                     ajax: '/admin/teachers'
                 });

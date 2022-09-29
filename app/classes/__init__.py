@@ -3,3 +3,5 @@
 from .database import Database
 from .user import User
 from .role import Role
+from .student import Student
+from .teacher import Teacher

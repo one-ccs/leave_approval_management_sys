@@ -13,8 +13,8 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background-color: #333a;
     backdrop-filter: blur(3px);
 }
@@ -40,4 +40,20 @@ body {
 }
 .itemcard-page.active {
     display: block;
+}
+.btn.btn-default:hover {
+    background-color: #ccca;
+}
+
+/* session */
+#btnLogin:hover {
+    color: black !important;
+    background-color: #00ff6e !important;
+}
+.carousel {
+    z-index: -9;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
 }

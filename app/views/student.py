@@ -63,7 +63,7 @@ def leaves():
                     'a1': row['a1'],
                     'a2': row['a2'],
                     'state': row['state'],
-                    'action': '<button class="btn btn-danger btn-sm me-1" onclick="onBtnRevokeClick(this)"><i class="fa fa-close"></i></button>',
+                    'action': '<button class="btn btn-danger btn-sm me-1" onclick="btnRevokeClick(this)"><i class="fa fa-close"></i></button>',
                 })
             res = make_response(dict, 200)
         else:
