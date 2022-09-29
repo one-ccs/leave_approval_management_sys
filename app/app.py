@@ -3,9 +3,9 @@
 from flask import Flask, request, session, make_response, render_template, send_file
 from datetime import timedelta
 from urllib.parse import quote
-from classes import Database, Role
+from app.classes import Database, Role
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../www/templates', static_folder='../www/static')
 app.config['SECRET_KEY'] = 'hard to guess'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=1800 + 3600 * 8)
 db = Database('./db/data.db')
@@ -91,12 +91,12 @@ def regist():
     return res
 
 
-from views import errorhandle_blue
-from views import student_blue
-from views import assistant_blue
-from views import office_blue
-from views import attendance_blue
-from views import admin_blue
+from app.views import errorhandle_blue
+from app.views import student_blue
+from app.views import assistant_blue
+from app.views import office_blue
+from app.views import attendance_blue
+from app.views import admin_blue
 
 app.register_blueprint(errorhandle_blue)
 app.register_blueprint(student_blue)

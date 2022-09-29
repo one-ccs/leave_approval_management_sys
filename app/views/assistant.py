@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from flask import request, session, make_response, render_template
-from views import assistant_blue
-from classes import Database
+from app.views import assistant_blue
+from app.classes import Database
 
 db = Database('./db/data.db')
 

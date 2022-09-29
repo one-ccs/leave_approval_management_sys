@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 from unicodedata import category
 from flask import request, session, make_response, render_template
-from views import student_blue
-from classes import Database
+from app.views import student_blue
+from app.classes import Database
 
 db = Database('./db/data.db')
 

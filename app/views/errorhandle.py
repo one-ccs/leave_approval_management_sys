@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from werkzeug.exceptions import HTTPException
 from jinja2.exceptions import TemplateNotFound
-from views import errorhandle_blue
+from app.views import errorhandle_blue
 
 @errorhandle_blue.errorhandler(HTTPException)
 def error_404(e):
