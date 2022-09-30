@@ -193,7 +193,6 @@ function regist() {
         $('#inputRegistRID').focus()
     }))
 }
-
 $('#btnUserLR').on('click', function() {
     if($(this).text() === '登录 / 注册' || !getCookie('name')) {
         window.location.href = '/session';
@@ -251,6 +250,69 @@ $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disab
     $(ancestry).children('.itemcard-page.active').removeClass('active'),
     $(ancestry).children(`[data-itemcard-page="${this.getAttribute('data-itemcard-menu')}"]`).addClass('active');
 }),
+$('table').on('mousedown', function(e) {
+    this.selector = {
+        mousedown: true,
+        firstX: e.pageX,
+        firstY: e.pageY,
+        data: {
+            length: 0,
+            list: [],
+        },
+    }
+    $(this).find('tbody > tr.table-active').removeClass('table-active'),
+    $(e.target.parentNode).addClass('table-active');
+    $(this).find('tbody > tr').not('[data-drag-bind="true"]').each((index, element) => {
+        $(element).attr('data-drag-bind', 'true');
+        $(element).on('mouseenter', (e) => {
+            if(!this.selector.mousedown) return; 
+            let tr = e.target.parentNode;
+            tr.enterY = e.pageY;
+            $(tr).addClass('table-active');
+        });
+        $(element).on('mouseleave', (e) => {
+            if(!this.selector.mousedown) return; 
+            let tr = e.target.parentNode;
+            tr.leaveY = e.pageY;
+            if(tr.leaveY < tr.enterY) {
+                $(tr).removeClass('table-active');
+            }
+        });
+    }),
+    $('#drag-box').css({
+        'left': e.pageX + 'px',
+        'top': e.pageY + 'px',
+        'display': 'block',
+    });
+}),
+$('table').on('mousemove', function(e) {
+    if(!this.selector || !this.selector.mousedown) return;
+    $('#drag-box').css({
+        'width': e.pageX - this.selector.firstX + 'px',
+        'height': e.pageY - this.selector.firstY + 'px',
+    });
+}),
+$('table').on('mouseup', function(e) {
+    this.selector.mousedown = false;
+    let selected = $(this).find('tbody > tr.table-active');
+    for(row of selected) {
+        let rowData = $(this).DataTable().row(row).data();
+        let sid = rowData.sid;
+        let name = rowData.name;
+        this.selector.data.list.push({
+            sid: sid,
+            name: name,
+        });
+    }
+    this.selector.data.length = selected.length;
+    $('#drag-box').css({
+        'left': 0,
+        'top': 0,
+        'width': 0,
+        'height': 0,
+        'display': 'none',
+    });
+}),
 $(document).ready(function() {
     let rid = getCookie('rid');
     let name = getCookie('name');
@@ -301,6 +363,17 @@ function btnAgreeClick(self) {
 }
 function btnReportClick(self) {
 
+}
+function getActiveRowData(table) {
+
+}
+function btnAdminDeleteStudentClick() {
+    let list = studentTable.get(0).selector.data.list;
+    console.log(list)
+}
+function btnAdminDeleteTeacherClick() {
+    let list = studentTable.get(0).selector.data.list;
+    console.log(list)
 }
 function btnModifyStudentClick(self) {
     let dsid = $(self).attr('data-sid');

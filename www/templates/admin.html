@@ -5,7 +5,7 @@
 {% endblock title %}
 
 {% block body %}
-    <div class="container-fluid d-flex align-items-center" style="width: 70%;height: calc(100% - 62px);">
+    <div class="container d-flex align-items-center" style="height: calc(100% - 62px);">
         <div class="itemcard">
             <div class="itemcard-menu">
                 <ul class="pagination">
@@ -45,27 +45,46 @@
             </div>
             <div data-itemcard-page="2" class="itemcard-page">
                 <div class="container">
+                    <div class="row pb-2 mb-2" style="border-bottom: 1px solid black;">
+                        <div class="col">
+                            <button class="btn btn-danger" onclick="btnAdminDeleteStudentClick()">删除<i class="fa fa-trash-o ms-2"></i></button>
+                        </div>
+                        <div class="col d-flex justify-content-end">
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" onclick="btnModifyStudentClick(this)">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
+                            <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#modifyStudentModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
+                        </div>
+                    </div>
                     <div class="row mt-2">
-                        <table id="studentTable" class="col table table-striped table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
+                        <table id="studentTable" class="col table table-hover table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
                             <thead>
-                                <tr><th>序号</th><th>学号</th><th>姓名</th><th>性别</th><th>学部</th><th>系别</th><th>专业</th><th>班级</th><th>操作</th></tr>
+                                <tr><th>序号</th><th>学号</th><th>姓名</th><th>性别</th><th>学部</th><th>系别</th><th>专业</th><th>班级</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td><button class="btn btn-warning btn-sm me-1 disabled"><i class="fa fa-pencil-square-o"></i></button></td></tr>
+                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
                             </tbody>
                         </table>
+                        <div style="background-color: rgba(139, 191, 249, 0.5); border: 1px solid rgb(19, 98, 180); top: 124.5px; left: 356px; width: 0px; height: 0px; display: none; position: absolute; z-index: -999;"></div>
                     </div>
                 </div>
             </div>
             <div data-itemcard-page="3" class="itemcard-page">
                 <div class="container">
+                    <div class="row pb-2 mb-2" style="border-bottom: 1px solid black;">
+                        <div class="col">
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" onclick="btnModifyStudentClick(this)">删除<i class="fa fa-trash-o ms-2"></i></button>
+                        </div>
+                        <div class="col d-flex justify-content-end">
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" onclick="btnModifyStudentClick(this)">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
+                            <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
+                        </div>
+                    </div>
                     <div class="row mt-2">
-                        <table id="teacherTable" class="col table table-striped table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
+                        <table id="teacherTable" class="col table table-hover table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
                             <thead>
-                                <tr><th>序号</th><th>ID</th><th>姓名</th><th>性别</th><th>电话号码</th><th>职能</th><th>操作</th></tr>
+                                <tr><th>序号</th><th>ID</th><th>姓名</th><th>性别</th><th>电话号码</th><th>职能</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td><button class="btn btn-warning btn-sm me-1 disabled"><i class="fa fa-pencil-square-o"></i></button></td></tr>
+                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -184,65 +203,57 @@
         let studentTable = teacherTable = null;
         $.fn.dataTable.ext.errMode = 'throw';
         $('[data-itemcard-menu="2"]').on('click', () => {
-            if(!studentTable) {
-                studentTable = $('#studentTable').dataTable({
-                    processing: true,
-                    stateSave: true,
-                    language: {
-                        url: '/static/localisation/zh_CN.json'
-                    },
-                    columns: [
-                        {'data': 'on'},
-                        {'data': 'sid'},
-                        {'data': 'name'},
-                        {'data': 'gender'},
-                        {'data': 'department'},
-                        {'data': 'faculty'},
-                        {'data': 'major'},
-                        {'data': 'class'},
-                        {'data': 'action'},
-                    ],
-                    columnDefs: [
-                        {'width': '5%', 'targets': 0},
-                        {'width': '10%', 'targets': 1},
-                        {'width': '6%', 'targets': 2},
-                        {'width': '5%', 'targets': 3},
-                        {'width': '16%', 'targets': 4},
-                        {'width': '25%', 'targets': 5},
-                        {'width': '23%', 'targets': 6},
-                        {'width': '5%', 'targets': 7},
-                        {'width': '5%', 'targets': 8},
-                    ],
-                    ajax: '/admin/students'
-                });
-            }
-            else {}
+            if(studentTable) return;
+            studentTable = $('#studentTable').dataTable({
+                processing: true,
+                stateSave: true,
+                language: {
+                    url: '/static/localisation/zh_CN.json'
+                },
+                columns: [
+                    {'data': 'on'},
+                    {'data': 'sid'},
+                    {'data': 'name'},
+                    {'data': 'gender'},
+                    {'data': 'department'},
+                    {'data': 'faculty'},
+                    {'data': 'major'},
+                    {'data': 'class'},
+                ],
+                columnDefs: [
+                    {'width': '5%', 'targets': 0},
+                    {'width': '10%', 'targets': 1},
+                    {'width': '6%', 'targets': 2},
+                    {'width': '5%', 'targets': 3},
+                    {'width': '16%', 'targets': 4},
+                    {'width': '25%', 'targets': 5},
+                    {'width': '23%', 'targets': 6},
+                    {'width': '5%', 'targets': 7},
+                ],
+                ajax: '/admin/students'
+            });
         });
         $('[data-itemcard-menu="3"]').on('click', () => {
-            if(!teacherTable) {
-                teacherTable = $('#teacherTable').dataTable({
-                    "processing": true,
-                    "stateSave": true,
-                    language: {
-                        url: '/static/localisation/zh_CN.json'
-                    },
-                    columns: [
-                        {'data': 'on'},
-                        {'data': 'tid'},
-                        {'data': 'name'},
-                        {'data': 'gender'},
-                        {'data': 'telphone'},
-                        {'data': 'role'},
-                        {'data': 'action'},
-                    ],
-                    columnDefs: [
-                        {'width': '5%', 'targets': 0},
-                        {'width': '5%', 'targets': 6},
-                    ],
-                    ajax: '/admin/teachers'
-                });
-            }
-            else {}
+            if(teacherTable)  return;
+            teacherTable = $('#teacherTable').dataTable({
+                "processing": true,
+                "stateSave": true,
+                language: {
+                    url: '/static/localisation/zh_CN.json'
+                },
+                columns: [
+                    {'data': 'on'},
+                    {'data': 'tid'},
+                    {'data': 'name'},
+                    {'data': 'gender'},
+                    {'data': 'telphone'},
+                    {'data': 'role'},
+                ],
+                columnDefs: [
+                    {'width': '5%', 'targets': 0},
+                ],
+                ajax: '/admin/teachers'
+            });
         });
     </script>
 {% endblock %}

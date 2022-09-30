@@ -56,12 +56,25 @@ def students():
                     'faculty': row['faculty'],
                     'major': row['major'],
                     'class': row['class'],
-                    'action': f'''<button class="btn btn-warning btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" data-sid="{row['sid']}" onclick="btnModifyStudentClick(this)"><i class="fa fa-pencil-square-o"></i></button>''',
+                    # 'action': f'''<button class="btn btn-warning btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" data-sid="{row['sid']}" onclick="btnModifyStudentClick(this)"><i class="fa fa-pencil-square-o"></i></button>''',
                 })
             res = make_response(dict, 200)
         else:
             res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
     if request.method == 'POST':
+        sid = request.form.get('sid')
+        name = request.form.get('name')
+        gend = request.form.get('gender')
+        depa = request.form.get('department')
+        facu = request.form.get('faculty')
+        majo = request.form.get('major')
+        clas = request.form.get('class')
+        try:
+            stu = Student(name, 'None', sid, gend, depa, facu, majo, clas)
+            stu.id = session.get(stu.sid)['id']
+        except ValueError:
+            return make_response({'state': 'fail', 'msg': '学号和姓名不能为空'}, 403)
+        result = db.execute()
         res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
     if request.method == 'DELETE':
         sid = request.form.get('sid')
@@ -100,7 +113,7 @@ def teachers():
                     'gender': row['gender'],
                     'telphone': row['telphone'],
                     'role': row['role'],
-                    'action': f'''<button class="btn btn-warning btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" data-tid="{row['tid']}" onclick="btnModifyTeacherClick(this)"><i class="fa fa-pencil-square-o"></i></button>''',
+                    # 'action': f'''<button class="btn btn-warning btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" data-tid="{row['tid']}" onclick="btnModifyTeacherClick(this)"><i class="fa fa-pencil-square-o"></i></button>''',
                 })
             res = make_response(dict, 200)
         else:
