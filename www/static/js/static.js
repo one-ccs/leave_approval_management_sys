@@ -253,10 +253,8 @@ $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disab
 $('table').on('mousedown', function(e) {
     this.selector = {
         mousedown: true,
-        left: e.pageX,
-        top: e.pageY,
-        width: 0,
-        height: 0,
+        x: e.pageX,
+        y: e.pageY,
         data: {
             length: 0,
             list: [],
@@ -284,27 +282,27 @@ $('table').on('mousedown', function(e) {
         let offset = 5; // 设置误差防止隔行选择
         $(element).on('mouseenter', (e) => {
             if(!this.selector.mousedown) return; 
-            let tr = e.target.parentNode;
-            let top = this.selector.top;
-            let nowY = e.pageY;
-            let trTop = tr.offsetTop;
-            let trHeight = tr.offsetHeight;
-            if(nowY > top) {
-                if(nowY + offset > trTop) $(tr).addClass('table-active');
+            let tr = e.currentTarget;
+            let originY = this.selector.y;
+            let offsetY = e.offsetY;
+            if(e.pageY > originY) {
+                if(offsetY >= 0) $(tr).addClass('table-active');
             }
             else {
-                // console.log(nowY - offset, trTop, trTop + trHeight)
-                if(nowY - offset < trTop + trHeight) $(tr).addClass('table-active');
+                if(e.offsetY > 0) $(tr).addClass('table-active');
             }
         });
         $(element).on('mouseleave', (e) => {
             if(!this.selector.mousedown) return; 
-            let tr = e.target.parentNode;
-            let top = this.selector.top;
+            let tr = e.currentTarget;
+            let originY = this.selector.y;
+            let offsetY = e.offsetY;
             let nowY = e.pageY;
-            let trTop = $(tr).offset().top;
-            if(nowY > top) {
-                if(nowY - offset < trTop) $(tr).removeClass('table-active');
+            if(nowY > originY) {
+                if(offsetY < 0) $(tr).removeClass('table-active');
+            }
+            else {
+                if(e.offsetY > 0) $(tr).removeClass('table-active');
             }
         });
     }),
@@ -317,35 +315,35 @@ $('table').on('mousedown', function(e) {
 }),
 $('table').on('mousemove', function(e) {
     if(!this.selector || !this.selector.mousedown) return;
-    console.log(e.target.parentNode.tagName, e.target.parentNode.offsetLeft, e.target.parentNode.offsetTop)
+    // console.log(e.target.parentNode.tagName, e.target.parentNode.offsetLeft, e.target.parentNode.offsetTop)
     e.preventDefault();
     // 计算拖选框二维
-    let left = this.selector.left;
-    let top = this.selector.top;
+    let originX = this.selector.x;
+    let originY = this.selector.y;
     let nowY = e.pageY;
     let nowX = e.pageX;
-    let _left = left, _top = top, _width = Math.abs(nowX - left), _height = Math.abs(nowY - top);
-    if(nowY > top) {
-        if(nowX > left) {
-            _width = nowX - left;
-            _height = nowY - top;
+    let _x = originX, _y = originY, _width = Math.abs(nowX - originX), _height = Math.abs(nowY - originY);
+    if(nowY > originY) {
+        if(nowX > originX) {
+            _width = nowX - originX;
+            _height = nowY - originY;
         }
         else {
-            _left -= left - nowX;
+            _x -= originX - nowX;
         }
     }
     else {
-        if(nowX > left) {
-            _top -= top - nowY;
+        if(nowX > originX) {
+            _y -= originY - nowY;
         }
         else {
-            _left -= left - nowX;
-            _top -= top - nowY;
+            _x -= originX - nowX;
+            _y -= originY - nowY;
         }
     }
     $('#drag-box').css({
-        'left': _left + 'px',
-        'top': _top + 'px',
+        'left': _x + 'px',
+        'top': _y + 'px',
         'width': _width + 'px',
         'height': _height + 'px',
     });
@@ -356,10 +354,10 @@ $('table').on('mouseup', function(e) {
     let selected = $(this).find('tbody > tr.table-active');
     for(row of selected) {
         let rowData = $(this).DataTable().row(row).data();
-        let sid = rowData.sid;
+        let id = rowData.sid || rowData.tid;
         let name = rowData.name;
         this.selector.data.list.push({
-            sid: sid,
+            id: id,
             name: name,
         });
     }
@@ -379,10 +377,10 @@ $('table').on('mouseleave', function(e) {
         let selected = $(this).find('tbody > tr.table-active');
         for(row of selected) {
             let rowData = $(this).DataTable().row(row).data();
-            let sid = rowData.sid;
+            let id = rowData.sid || rowData.tid;
             let name = rowData.name;
             this.selector.data.list.push({
-                sid: sid,
+                id: id,
                 name: name,
             });
         }
@@ -456,7 +454,7 @@ function btnAdminDeleteStudentClick() {
     console.log(list)
 }
 function btnAdminDeleteTeacherClick() {
-    let list = studentTable.get(0).selector.data.list;
+    let list = teacherTable.get(0).selector.data.list;
     console.log(list)
 }
 function btnModifyStudentClick(self) {
