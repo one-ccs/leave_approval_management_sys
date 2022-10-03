@@ -6,6 +6,9 @@
 
 {% block style %}
     <style>
+        #backdrop-filter {
+            background-color: #aaa3;
+        }
         #welcome {
             position: absolute;
             top: 50%;
@@ -21,6 +24,26 @@
 
 {% block body %}
     <div class="container">
-        <h1 id="welcome" class="rounded-3 my-5 p-5">欢迎使用 “电气学院请假审批管理系统”</h1>
+        <h1 id="welcome" class="rounded-4 p-5 w-50" style="letter-spacing: 16px;">电气学院请假审批管理系统</h1>
+    </div>
+    
+    <div id="carousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active" data-bs-interval="2500">
+                <img src="/static/img/img01.jpg" class="d-block w-100">
+            </div>
+            <div class="carousel-item" data-bs-interval="2500">
+                <img src="/static/img/img02.jpg" class="d-block w-100">
+            </div>
+            <div class="carousel-item" data-bs-interval="2500">
+                <img src="/static/img/img03.jpg" class="d-block w-100">
+            </div>
+            <div class="carousel-item" data-bs-interval="2500">
+                <img src="/static/img/img04.jpg" class="d-block w-100">
+            </div>
+            <div class="carousel-item" data-bs-interval="2500">
+                <img src="/static/img/img05.jpg" class="d-block w-100">
+            </div>
+        </div>
     </div>
 {% endblock body %}

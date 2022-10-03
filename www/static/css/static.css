@@ -69,7 +69,7 @@ table {
 }
 
 /* session */
-#btnLogin:hover {
+#btnLogin:hover, #btnRegist:hover {
     color: black !important;
     background-color: #00ff6e !important;
 }

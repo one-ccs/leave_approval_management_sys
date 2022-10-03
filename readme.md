@@ -6,7 +6,7 @@
 
 ## 技术栈
 
-前端：HTML、CSS、JavaScript、JQuery、JQuery-Confirm、Bootstrap 5、DataTable、Font Awesome
+前端：HTML、CSS、JavaScript、JQuery、JQuery-Confirm、Bootstrap 5、BootstraTable、DataTable、Font Awesome
 
 后端：Python、Flask、SQLite
 

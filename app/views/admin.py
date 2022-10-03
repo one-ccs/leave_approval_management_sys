@@ -56,7 +56,6 @@ def students():
                     'faculty': row['faculty'],
                     'major': row['major'],
                     'class': row['class'],
-                    # 'action': f'''<button class="btn btn-warning btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" data-sid="{row['sid']}" onclick="btnModifyStudentClick(this)"><i class="fa fa-pencil-square-o"></i></button>''',
                 })
             res = make_response(dict, 200)
         else:
@@ -113,7 +112,6 @@ def teachers():
                     'gender': row['gender'],
                     'telphone': row['telphone'],
                     'role': row['role'],
-                    # 'action': f'''<button class="btn btn-warning btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" data-tid="{row['tid']}" onclick="btnModifyTeacherClick(this)"><i class="fa fa-pencil-square-o"></i></button>''',
                 })
             res = make_response(dict, 200)
         else:

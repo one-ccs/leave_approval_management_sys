@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    管理员 - {{ rid }} {{ name }}
+    管理员 - {{ rid }} {{ name }}_电气信息学院请假管理系统
 {% endblock title %}
 
 {% block body %}
@@ -45,48 +45,25 @@
             </div>
             <div data-itemcard-page="2" class="itemcard-page">
                 <div class="container">
-                    <div class="row pb-2 mb-2" style="border-bottom: 1px solid black;">
-                        <div class="col">
+                    <div class="row">
+                        <div id="studentToolbar" class="col button-group">
                             <button class="btn btn-danger" onclick="btnAdminDeleteStudentClick()">删除<i class="fa fa-trash-o ms-2"></i></button>
-                        </div>
-                        <div class="col d-flex justify-content-end">
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" onclick="btnModifyStudentClick(this)">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
-                            <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#modifyStudentModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modifyStudentModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
                         </div>
-                    </div>
-                    <div class="row mt-2">
-                        <table id="studentTable" class="col table table-hover table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
-                            <thead>
-                                <tr><th>序号</th><th>学号</th><th>姓名</th><th>性别</th><th>学部</th><th>系别</th><th>专业</th><th>班级</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                            </tbody>
-                        </table>
-                        <div style="background-color: rgba(139, 191, 249, 0.5); border: 1px solid rgb(19, 98, 180); top: 124.5px; left: 356px; width: 0px; height: 0px; display: none; position: absolute; z-index: -999;"></div>
+                        <table id="studentTable" class="col"></table>
                     </div>
                 </div>
             </div>
             <div data-itemcard-page="3" class="itemcard-page">
                 <div class="container">
-                    <div class="row pb-2 mb-2" style="border-bottom: 1px solid black;">
-                        <div class="col">
-                            <button class="btn btn-danger" onclick="btnAdminDeleteTeacherClick()">删除<i class="fa fa-trash-o ms-2"></i></button>
+                    <div class="row">
+                        <div id="teacherToolbar" class="col button-group">
+                                <button class="btn btn-danger" onclick="btnAdminDeleteTeacherClick()">删除<i class="fa fa-trash-o ms-2"></i></button>
+                                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" onclick="btnModifyStudentClick(this)">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
                         </div>
-                        <div class="col d-flex justify-content-end">
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" onclick="btnModifyStudentClick(this)">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
-                            <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <table id="teacherTable" class="col table table-hover table-bordered m-0 text-center" border="1" style="table-layout: fixed;">
-                            <thead>
-                                <tr><th>序号</th><th>ID</th><th>姓名</th><th>性别</th><th>电话号码</th><th>职能</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                            </tbody>
-                        </table>
+                        <table id="teacherTable" class="col"></table>
                     </div>
                 </div>
             </div>
@@ -201,59 +178,139 @@
 {% block script %}
     <script>
         let studentTable = teacherTable = null;
-        $.fn.dataTable.ext.errMode = 'throw';
         $('[data-itemcard-menu="2"]').on('click', () => {
             if(studentTable) return;
-            studentTable = $('#studentTable').dataTable({
-                processing: true,
-                stateSave: true,
-                language: {
-                    url: '/static/localisation/zh_CN.json'
+            studentTable = $('#studentTable').bootstrapTable({
+                locale: 'zh-CN',
+                toolbar: '#studentToolbar',
+                toolbarAlign: 'left',
+                buttonsOrder: ['paginationSwitch', 'refresh', 'toggle', 'fullscreen', 'columns'],
+                pagination: true,
+                search: true,
+                searchTimeOut: 300,
+                showColumns: true,
+                minimumCountColumns: 3,
+                clickToSelect: true,
+                multipleSelectRow: true,
+                showPaginationSwitch: true,
+                showToggle: true,
+                showFullscreen: true,
+                detailView: true,
+                detailViewIcon: true,
+                sortable: true,
+                detailFormatter: function(index, row, element) {
+                    return `${row.name} (${row.sid}) ${row.department} ${row.faculty} ${row.major} ${row.class}班`;
                 },
-                columns: [
-                    {'data': 'on'},
-                    {'data': 'sid'},
-                    {'data': 'name'},
-                    {'data': 'gender'},
-                    {'data': 'department'},
-                    {'data': 'faculty'},
-                    {'data': 'major'},
-                    {'data': 'class'},
-                ],
-                columnDefs: [
-                    {'width': '5%', 'targets': 0},
-                    {'width': '10%', 'targets': 1},
-                    {'width': '6%', 'targets': 2},
-                    {'width': '5%', 'targets': 3},
-                    {'width': '16%', 'targets': 4},
-                    {'width': '25%', 'targets': 5},
-                    {'width': '23%', 'targets': 6},
-                    {'width': '5%', 'targets': 7},
-                ],
-                ajax: '/admin/students'
+                url: '/admin/students',
+                columns: [{
+                    field: 'select',
+                    title: '复选', 
+                    checkbox: true, 
+                }, {
+                    field: 'on',
+                    title: '序号', 
+                    sortable: true,
+                    align: 'center', 
+                    width: 1,
+                }, {
+                    field: 'sid', 
+                    title: '学号', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'name', 
+                    title: '姓名', 
+                    sortable: true
+                }, {
+                    field: 'gender', 
+                    title: '性别', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'department', 
+                    title: '学部', 
+                    sortable: true
+                }, {
+                    field: 'faculty', 
+                    title: '系别', 
+                    sortable: true
+                }, {
+                    field: 'major', 
+                    title: '专业', 
+                    sortable: true
+                }, {
+                    field: 'class', 
+                    title: '班级', 
+                    sortable: true,
+                    align: 'center', 
+                }],
+                totalField: 'length',
+                dataField: 'data',
+                idField: 'sid',
             });
-        });
+            bindDragSelectEvent(studentTable.get(0), $('#studentTable').bootstrapTable, 'sid');
+        }),
         $('[data-itemcard-menu="3"]').on('click', () => {
             if(teacherTable)  return;
-            teacherTable = $('#teacherTable').dataTable({
-                "processing": true,
-                "stateSave": true,
-                language: {
-                    url: '/static/localisation/zh_CN.json'
+            teacherTable = $('#teacherTable').bootstrapTable({
+                locale: 'zh-CN',
+                toolbar: '#teacherToolbar',
+                toolbarAlign: 'left',
+                buttonsOrder: ['paginationSwitch', 'refresh', 'toggle', 'fullscreen', 'columns'],
+                pagination: true,
+                search: true,
+                searchTimeOut: 300,
+                showColumns: true,
+                minimumCountColumns: 3,
+                clickToSelect: true,
+                multipleSelectRow: true,
+                showPaginationSwitch: true,
+                showToggle: true,
+                showFullscreen: true,
+                detailView: true,
+                detailViewIcon: true,
+                sortable: true,
+                detailFormatter: function(index, row, element) {
+                    return `${row.name} ${row.telphone}`;
                 },
-                columns: [
-                    {'data': 'on'},
-                    {'data': 'tid'},
-                    {'data': 'name'},
-                    {'data': 'gender'},
-                    {'data': 'telphone'},
-                    {'data': 'role'},
-                ],
-                columnDefs: [
-                    {'width': '5%', 'targets': 0},
-                ],
-                ajax: '/admin/teachers'
+                url: '/admin/teachers',
+                columns: [{
+                    checkbox: true, 
+                }, {
+                    field: 'on',
+                    title: '序号', 
+                    sortable: true,
+                    align: 'center', 
+                    width: 1,
+                }, {
+                    field: 'tid', 
+                    title: '教师编号', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'name', 
+                    title: '姓名', 
+                    sortable: true
+                }, {
+                    field: 'gender', 
+                    title: '性别', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'telphone', 
+                    title: '电话号码', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'role', 
+                    title: '职能', 
+                    sortable: true
+                }],
+                totalField: 'length',
+                dataField: 'data',
+                idField: 'tid',
             });
+            bindDragSelectEvent(teacherTable.get(0), $('#teacherTable').bootstrapTable, 'tid');
         });
     </script>
 {% endblock %}

@@ -71,6 +71,127 @@ function dialog_confirm(msg, confirm=function(){}, cancel=function(){}) {
         }
     });
 }
+function bindDragSelectEvent(table, bootstrapTable, field) {
+    $(table).on('mousedown', function(e) {
+        this.selector = {
+            mousedown: true,
+            x: e.pageX,
+            y: e.pageY,
+        }
+        if(e.target.parentNode.parentNode.tagName === 'THEAD') {
+            this.selector.mousedown = false;
+            return;
+        }
+        if(e.ctrlKey && e.shiftKey) {
+            
+        }
+        else if(e.ctrlKey) {
+            // $(this).find('tbody > tr.selected').removeClass('selected');
+        }
+        else if(e.shiftKey) {
+            
+        }
+        else {
+            bootstrapTable().uncheckAll();
+        }
+        // $(e.target.parentNode).addClass('selected');
+        values = [];
+        $(this).find('tbody > tr').not('[data-drag-bind="true"]').each((index, element) => {
+            $(element).attr('data-drag-bind', 'true');
+            let offset = 5; // 设置误差防止隔行选择
+            $(element).on('mouseenter', (e) => {
+                if(!this.selector.mousedown) return; 
+                let tr = e.currentTarget;
+                let originY = this.selector.y;
+                let offsetY = e.offsetY;
+                if(e.pageY > originY) {
+                    if(offsetY >= 0) $(tr).addClass('selected');
+                }
+                else {
+                    if(e.offsetY > 0) $(tr).addClass('selected');
+                }
+                bootstrapTable('checkBy', {field: field, values: values})
+            });
+            $(element).on('mouseleave', (e) => {
+                if(!this.selector.mousedown) return; 
+                let tr = e.currentTarget;
+                let originY = this.selector.y;
+                let offsetY = e.offsetY;
+                let nowY = e.pageY;
+                if(nowY > originY) {
+                    if(offsetY < 0) $(tr).removeClass('selected');
+                }
+                else {
+                    if(e.offsetY > 0) $(tr).removeClass('selected');
+                }
+            });
+        }),
+        $('#drag-box').css({
+            'z-index': 999,
+            'left': e.pageX + 'px',
+            'top': e.pageY + 'px',
+            'display': 'block',
+        });
+    }),
+    $(table).on('mousemove', function(e) {
+        if(!this.selector || !this.selector.mousedown) return;
+        e.preventDefault();
+        // 计算拖选框二维
+        let originX = this.selector.x;
+        let originY = this.selector.y;
+        let nowY = e.pageY;
+        let nowX = e.pageX;
+        let _x = originX, _y = originY, _width = Math.abs(nowX - originX), _height = Math.abs(nowY - originY);
+        if(nowY > originY) {
+            if(nowX > originX) {
+                _width = nowX - originX;
+                _height = nowY - originY;
+            }
+            else {
+                _x -= originX - nowX;
+            }
+        }
+        else {
+            if(nowX > originX) {
+                _y -= originY - nowY;
+            }
+            else {
+                _x -= originX - nowX;
+                _y -= originY - nowY;
+            }
+        }
+        $('#drag-box').css({
+            'left': _x + 'px',
+            'top': _y + 'px',
+            'width': _width + 'px',
+            'height': _height + 'px',
+        });
+    }),
+    $(table).on('mouseup', function(e) {
+        if(!this.selector) return;
+        this.selector.mousedown = false;
+        $('#drag-box').css({
+            'z-index': -999,
+            'left': 0,
+            'top': 0,
+            'width': 0,
+            'height': 0,
+            'display': 'none',
+        });
+    }),
+    $(table).on('mouseleave', function(e) {
+        if(!this.selector || !this.selector.mousedown) return;
+        this.selector.mousedown = false;
+        $('#drag-box').css({
+            'z-index': -999,
+            'left': 0,
+            'top': 0,
+            'width': 0,
+            'height': 0,
+            'display': 'none',
+        });
+    });
+}
 function login() {
     $('#formLogin').addClass('was-validated');
     let rid = $("#inputLoginRID").val(), password = $("#inputLoginPass").val();
@@ -250,151 +371,6 @@ $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disab
     $(ancestry).children('.itemcard-page.active').removeClass('active'),
     $(ancestry).children(`[data-itemcard-page="${this.getAttribute('data-itemcard-menu')}"]`).addClass('active');
 }),
-$('table').on('mousedown', function(e) {
-    this.selector = {
-        mousedown: true,
-        x: e.pageX,
-        y: e.pageY,
-        data: {
-            length: 0,
-            list: [],
-        },
-    }
-    if(e.target.parentNode.parentNode.tagName === 'THEAD') {
-        this.selector.mousedown = false;
-        return;
-    }
-    if(e.ctrlKey && e.shiftKey) {
-        
-    }
-    else if(e.ctrlKey) {
-        // $(this).find('tbody > tr.table-active').removeClass('table-active');
-    }
-    else if(e.shiftKey) {
-        
-    }
-    else {
-        $(this).find('tbody > tr.table-active').removeClass('table-active');
-    }
-    $(e.target.parentNode).addClass('table-active');
-    $(this).find('tbody > tr').not('[data-drag-bind="true"]').each((index, element) => {
-        $(element).attr('data-drag-bind', 'true');
-        let offset = 5; // 设置误差防止隔行选择
-        $(element).on('mouseenter', (e) => {
-            if(!this.selector.mousedown) return; 
-            let tr = e.currentTarget;
-            let originY = this.selector.y;
-            let offsetY = e.offsetY;
-            if(e.pageY > originY) {
-                if(offsetY >= 0) $(tr).addClass('table-active');
-            }
-            else {
-                if(e.offsetY > 0) $(tr).addClass('table-active');
-            }
-        });
-        $(element).on('mouseleave', (e) => {
-            if(!this.selector.mousedown) return; 
-            let tr = e.currentTarget;
-            let originY = this.selector.y;
-            let offsetY = e.offsetY;
-            let nowY = e.pageY;
-            if(nowY > originY) {
-                if(offsetY < 0) $(tr).removeClass('table-active');
-            }
-            else {
-                if(e.offsetY > 0) $(tr).removeClass('table-active');
-            }
-        });
-    }),
-    $('#drag-box').css({
-        'z-index': 999,
-        'left': e.pageX + 'px',
-        'top': e.pageY + 'px',
-        'display': 'block',
-    });
-}),
-$('table').on('mousemove', function(e) {
-    if(!this.selector || !this.selector.mousedown) return;
-    // console.log(e.target.parentNode.tagName, e.target.parentNode.offsetLeft, e.target.parentNode.offsetTop)
-    e.preventDefault();
-    // 计算拖选框二维
-    let originX = this.selector.x;
-    let originY = this.selector.y;
-    let nowY = e.pageY;
-    let nowX = e.pageX;
-    let _x = originX, _y = originY, _width = Math.abs(nowX - originX), _height = Math.abs(nowY - originY);
-    if(nowY > originY) {
-        if(nowX > originX) {
-            _width = nowX - originX;
-            _height = nowY - originY;
-        }
-        else {
-            _x -= originX - nowX;
-        }
-    }
-    else {
-        if(nowX > originX) {
-            _y -= originY - nowY;
-        }
-        else {
-            _x -= originX - nowX;
-            _y -= originY - nowY;
-        }
-    }
-    $('#drag-box').css({
-        'left': _x + 'px',
-        'top': _y + 'px',
-        'width': _width + 'px',
-        'height': _height + 'px',
-    });
-}),
-$('table').on('mouseup', function(e) {
-    if(!this.selector) return;
-    this.selector.mousedown = false;
-    let selected = $(this).find('tbody > tr.table-active');
-    for(row of selected) {
-        let rowData = $(this).DataTable().row(row).data();
-        let id = rowData.sid || rowData.tid;
-        let name = rowData.name;
-        this.selector.data.list.push({
-            id: id,
-            name: name,
-        });
-    }
-    this.selector.data.length = selected.length;
-    $('#drag-box').css({
-        'z-index': -999,
-        'left': 0,
-        'top': 0,
-        'width': 0,
-        'height': 0,
-        'display': 'none',
-    });
-}),
-$('table').on('mouseleave', function(e) {
-    if(this.selector && this.selector.mousedown) {
-        this.selector.mousedown = false;
-        let selected = $(this).find('tbody > tr.table-active');
-        for(row of selected) {
-            let rowData = $(this).DataTable().row(row).data();
-            let id = rowData.sid || rowData.tid;
-            let name = rowData.name;
-            this.selector.data.list.push({
-                id: id,
-                name: name,
-            });
-        }
-        this.selector.data.length = selected.length;
-        $('#drag-box').css({
-            'z-index': -999,
-            'left': 0,
-            'top': 0,
-            'width': 0,
-            'height': 0,
-            'display': 'none',
-        });
-    }
-}),
 $(document).ready(function() {
     let rid = getCookie('rid');
     let name = getCookie('name');
@@ -405,6 +381,7 @@ $(document).ready(function() {
             case '/':
             case '/login':
             case '/regist':
+            case '/session':
                 $('#btnUserCenter').show();
                 break;
         }
@@ -450,11 +427,11 @@ function getActiveRowData(table) {
 
 }
 function btnAdminDeleteStudentClick() {
-    let list = studentTable.get(0).selector.data.list;
+    let list = $(studentTable).bootstrapTable('getSelections');
     console.log(list)
 }
 function btnAdminDeleteTeacherClick() {
-    let list = teacherTable.get(0).selector.data.list;
+    let list = $(studentTable).bootstrapTable('getSelections');
     console.log(list)
 }
 function btnModifyStudentClick(self) {
