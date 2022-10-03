@@ -105,6 +105,9 @@ def regist():
             res = make_response({'state': 'fail', 'msg': '注册失败, ID 已存在, 请修改后重试'}, 403)
     return res
 
+@app.route('/headimg', methods=['POST'])
+def headimg():
+    pass
 
 from app.views import errorhandle_blue
 from app.views import student_blue

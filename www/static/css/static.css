@@ -67,6 +67,23 @@ table {
 .btn.btn-default:hover {
     background-color: #ccca;
 }
+.headimg-over {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    width: 100%;
+    height: calc(100% - 41px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0008;
+    opacity: 0;
+}
+.headimg-over:hover {
+    opacity: 1;
+}
 
 /* session */
 #btnLogin:hover, #btnRegist:hover {

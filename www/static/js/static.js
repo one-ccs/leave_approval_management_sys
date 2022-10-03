@@ -71,6 +71,9 @@ function dialog_confirm(msg, confirm=function(){}, cancel=function(){}) {
         }
     });
 }
+function modal_form(options={}) {
+    let sHTML = ` <div class="modal fade" id="${options.modalID}" role="dialog"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div class="modal-title">${options.title}</div> <button class="btn-close" data-bs-dismiss="modal"></button> </div> <div class="modal-body">${sForm}</div> <div class="modal-footer"> <button class="btn btn-primary" onclick="${onSubmit.name}()">提交</button> <button class="btn btn-danger" data-bs-dismiss="modal" onclick="${onClose.name}()">关闭</button> </div> </div> </div> </div>`;
+}
 function bindDragSelectEvent(table, bootstrapTable, field) {
     $(table).on('mousedown', function(e) {
         this.selector = {
@@ -429,6 +432,44 @@ function getActiveRowData(table) {
 function btnAdminDeleteStudentClick() {
     let list = $(studentTable).bootstrapTable('getSelections');
     console.log(list)
+    $.confirm({
+        title: '删除学生信息',
+        content: '<form id="test" class="my-2"> <div class="row"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="sid"> <label class="form-label float-start" for="sid">学号</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="department"> <label class="form-label" for="department">学部</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="faculty"> <label class="form-label" for="faculty">系别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="major"> <label class="form-label" for="major">专业</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="class"> <label class="form-label" for="class">班级</label> </div> </form>',
+        theme: 'bootstrap',
+        class: 'rounded',
+        buttons: {
+            submit: {
+                text: '提交',
+                btnClass: 'btn-primary',
+                action: function() {
+                    let sid = document.forms.test['sid'].value;
+                    let name = document.forms.test['name'].value;
+                    let gend = document.forms.test['gender'].value;
+                    let depa = document.forms.test['department'].value;
+                    let facu = document.forms.test['faculty'].value;
+                    let majo = document.forms.test['major'].value;
+                    let clas = document.forms.test['class'].value;
+                
+                    let form = new FormData();
+                    form.append('sid', sid);
+                    form.append('name', name);
+                    form.append('gender', gend);
+                    form.append('department', depa);
+                    form.append('faculty', facu);
+                    form.append('major', majo);
+                    form.append('class', clas);
+                    console.log(sid,name,gend,depa,facu,majo,clas);
+                },
+            },
+            cancel: {
+                text: '取消',
+                btnClass: 'btn-danger',
+                action: function() {
+
+                }
+            },
+        },
+    })
 }
 function btnAdminDeleteTeacherClick() {
     let list = $(studentTable).bootstrapTable('getSelections');

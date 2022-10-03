@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from flask import request, session, make_response, render_template
+from flask import request, session, make_response, render_template, url_for
+from os import path
 from app.views import admin_blue
 from app.classes import Database, Student
 
@@ -32,6 +33,11 @@ def root():
             'aid': session[rid]['rid'],
             'name': session[rid]['name'],
         }
+    headimg_path = url_for('static', filename=f'img/user_head/{args["aid"]}.webp')
+    if path.isfile('www' + headimg_path):
+        args['headimg'] = headimg_path
+    else:
+        args['headimg'] = url_for('static', filename=f'img/user_head/default.webp')
     return render_template('/admin.html', **args)
 
 @admin_blue.route('/students', methods=['GET', 'POST', 'DELETE'])

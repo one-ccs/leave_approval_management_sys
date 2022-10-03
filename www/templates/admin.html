@@ -27,7 +27,12 @@
                 <div class="row h-100 flex-nowrap align-items-center justify-content-center">
                     <div class="col col-2 col-lg-2 col-sm-3">
                         <div class="card">
-                            <img class=" card-body rounded" src="{{ url_for('static', filename='img/user.webp') }}" alt="user">
+                            <div class="card-body">
+                                <img class="card-img-top" src="{{ headimg }}" alt="user">
+                                <div class="headimg-over">
+                                    <i class="fa fa-camera text-white fs-6"></i>
+                                </div>
+                            </div>
                             <div class="card-footer text-center">{{ name }}</div>
                         </div>
                     </div>
