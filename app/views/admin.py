@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from flask import request, session, make_response, render_template, url_for
+from flask import request, session, make_response, render_template, url_for, redirect
 from os import path
 from app.views import admin_blue
 from app.classes import Database, Student
@@ -10,34 +10,31 @@ db = Database('./db/data.db')
 
 @admin_blue.before_request
 def check_login():
-    rid = request.cookies.get('rid')
-    if not rid or rid not in session:
-        return make_response({'state': 'fail', 'msg': '请登录后操作'}, 401)
-    if session.get(rid)['role'] != '管理员':
+    if 'role' not in session:
+        return redirect('/session')
+    if session.get('role')['role'] != '管理员':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
 
 @admin_blue.route('/')
 def root():
-    rid = request.cookies.get('rid')
-    args = {}
+    rid =session.get('role')['rid']
+    args = {'headimg': ''}
     result = db.execute('SELECT * FROM admin WHERE aid=?', (rid, ))
     if result and len(result) > 0:
         result = result[0]
         args = {
-            'aid': result['aid'],
+            'rid': result['aid'],
             'name': result['name'],
             'gender': result['gender'],
         }
     else:
         args = {
-            'aid': session[rid]['rid'],
-            'name': session[rid]['name'],
+            'rid': session['role']['rid'],
+            'name': session['role']['name'],
         }
-    headimg_path = url_for('static', filename=f'img/user_head/{args["aid"]}.webp')
+    headimg_path = url_for('static', filename=f'img/user_head/{args["rid"]}.webp')
     if path.isfile('www' + headimg_path):
         args['headimg'] = headimg_path
-    else:
-        args['headimg'] = url_for('static', filename=f'img/user_head/default.webp')
     return render_template('/admin.html', **args)
 
 @admin_blue.route('/students', methods=['GET', 'POST', 'DELETE'])
@@ -82,20 +79,18 @@ def students():
         result = db.execute()
         res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
     if request.method == 'DELETE':
-        sid = request.form.get('sid')
-        name = request.form.get('name')
-        gend = request.form.get('gender')
-        depa = request.form.get('department')
-        facu = request.form.get('faculty')
-        majo = request.form.get('major')
-        clas = request.form.get('class')
-        try:
-            stu = Student(name, 'None', sid, gend, depa, facu, majo, clas)
-            stu.id = session.get(stu.sid)['id']
-        except ValueError:
-            return make_response({'state': 'fail', 'msg': '学号和姓名不能为空'}, 403)
-        result = db.execute()
-        res = make_response({'state': 'fail', 'msg': '删除失败'}, 403)
+        sids = request.form.get('sids')
+        if not sids or len(sids) == 0:
+            return make_response({'state': 'fail', 'msg': '未提供要删除的学号'}, 403)
+        sids = sids.split(',')
+        _sids = []
+        for sid in sids:
+            _sids.append((sid, ))
+        result = db.executemany('DELETE FROM student WHERE sid=?', tuple(_sids))
+        if result and result > 0:
+            res = make_response({'state': 'ok', 'msg': f'删除成功, 共删除 {result} 条'}, 200)
+        else:
+            res = make_response({'state': 'fail', 'msg': '删除失败'}, 403)
     return res
 
 @admin_blue.route('/teachers', methods=['GET', 'POST', 'DELETE'])
@@ -125,5 +120,16 @@ def teachers():
     if request.method == 'POST':
         res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
     if request.method == 'DELETE':
-        res = make_response({'state': 'fail', 'msg': '删除失败'}, 403)
+        tids = request.form.get('tids')
+        if not tids or len(tids) == 0:
+            return make_response({'state': 'fail', 'msg': '未提供要删除的学号'}, 403)
+        tids = tids.split(',')
+        _tids = []
+        for tid in tids:
+            _tids.append((tid, ))
+        result = db.executemany('DELETE FROM teacher WHERE tid=?', tuple(_tids))
+        if result and result > 0:
+            res = make_response({'state': 'ok', 'msg': f'删除成功, 共删除 {result} 条'}, 200)
+        else:
+            res = make_response({'state': 'fail', 'msg': '删除失败'}, 403)
     return res

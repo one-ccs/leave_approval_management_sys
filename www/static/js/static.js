@@ -1,60 +1,57 @@
-function getCookie(name) 
-{ 
-    var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
- 
-    if(arr=document.cookie.match(reg)) 
-        return decodeURIComponent(arr[2]); 
-    else 
-        return null; 
-}
-function dialog_info(msg, callback=function(){}) {
+function dialog_info(msg, callback=function(){}, dismiss=true) {
     return $.confirm({
         title: "提示",
         content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "green",
-        autoClose: "cancelAction|800",
+        autoClose: "ok|800",
+        backgroundDismiss: dismiss,
         buttons: {
-            cancelAction: {
+            ok: {
                 text: '确定',
+                keys: ['esc', 'enter'],
                 action: callback
             }
         }
     });
 }
-function dialog_warning(msg, callback=function(){}) {
+function dialog_warning(msg, callback=function(){}, dismiss=true) {
     return $.confirm({
         title: "警告",
         content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "orange",
-        autoClose: "cancelAction|1200",
+        autoClose: "ok|1200",
+        backgroundDismiss: dismiss,
         buttons: {
-            cancelAction: {
+            ok: {
                 text: '确定',
+                keys: ['esc', 'enter'],
                 action: callback
             }
         }
     });
 }
-function dialog_error(msg, callback=function(){}) {
+function dialog_error(msg, callback=function(){}, dismiss=false) {
     return $.confirm({
         title: "错误",
         content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "red",
-        autoClose: "cancelAction|2000",
+        autoClose: "ok|2000",
+        backgroundDismiss: dismiss,
         buttons: {
-            cancelAction: {
+            ok: {
                 text: '确定',
+                keys: ['esc', 'enter'],
                 action: callback
             }
         }
     });
 }
-function dialog_confirm(msg, confirm=function(){}, cancel=function(){}) {
+function dialog_confirm(title, msg, confirm=function(){}, cancel=function(){}) {
     $.confirm({
-        title: "消息",
+        title: title,
         content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "red",
@@ -66,6 +63,7 @@ function dialog_confirm(msg, confirm=function(){}, cancel=function(){}) {
             },
             cancel: {
                 text: '取消',
+                keys: ['esc', 'enter'],
                 action: cancel
             }
         }
@@ -199,7 +197,7 @@ function login() {
     $('#formLogin').addClass('was-validated');
     let rid = $("#inputLoginRID").val(), password = $("#inputLoginPass").val();
     if (!rid || !password) {
-        return dialog_warning('ID 和密码不能为空！');
+        return dialog_warning('ID 和密码不能为空!');
     }
     let form = new FormData();
     form.append("rid", rid),
@@ -218,29 +216,12 @@ function login() {
         data: form
     };
     $.ajax(settings).done((function(data) {
-        let role = getCookie('role');
-        switch(role) {
-            case '学生':
-                window.location.href = '/student';
-                break;
-            case '辅导员':
-                window.location.href = '/assistant';
-                break;
-            case '教务处':
-                window.location.href = '/office';
-                break;
-            case '考勤':
-                window.location.href = '/attendance';
-                break;
-            case '管理员':
-                window.location.href = '/admin';
-                break;
-        }
+        window.location.href = '/user';
     })).fail((function(jqXHR) {
         let msg = JSON.parse(jqXHR.responseText).msg;
         switch(msg) {
             case '密码错误':
-                $('#formLogin > div > div.invalid-feedback').text('密码错误！'),
+                $('#formLogin > div > div.invalid-feedback').text('密码错误!'),
                 $("#inputLoginPass").val('');
                 break;
             case '不存在此用户':
@@ -252,40 +233,24 @@ function login() {
     }));
 }
 function logoff() {
-    $.confirm({
-        title: "登出",
-        content: '<span class="fileitemTr">' + "确定退出登录?" + "</span>",
-        theme: "bootstrap",
-        type: "red",
-        buttons: {
-            confirm: {
-                text: "确认",
-                btnClass: "btn-red",
-                action: () => {
-                    $.ajax({
-                        url: "/login",
-                        method: "DELETE",
-                    }).done(((data) => {
-                        dialog_info('登出成功, 即将返回首页...', function() {
-                            window.location.href = '/';
-                        });
-                    })).fail((function(jqXHR) {
-                        dialog_error(JSON.parse(jqXHR.responseText).msg);
-                    }));
-                }
-            },
-            cancel: {
-                text: '取消',
-                action: function() {}
-            }
-        }
+    dialog_confirm('登出', "确定退出登录?", function() {
+        $.ajax({
+            url: "/login",
+            method: "DELETE",
+        }).done(((data) => {
+            dialog_info('登出成功, 即将返回首页...', function() {
+                window.location.href = '/';
+            }, false);
+        })).fail((function(jqXHR) {
+            dialog_error(JSON.parse(jqXHR.responseText).msg);
+        }));
     });
 }
 function regist() {
     $('#formRegist').addClass('was-validated');
     let rid = $('#inputRegistRID').val(), username = $("#inputRegistName").val(), password = $("#inputRegistPass").val();
     if (!rid || !username || !password) {
-        return dialog_warning('ID、姓名和密码不能为空！');
+        return dialog_warning('ID、姓名和密码不能为空!');
     }
     let form = new FormData();
     form.append("rid", rid),
@@ -305,25 +270,37 @@ function regist() {
         data: form
     };
     $.ajax(settings).done((function(data) {
-        dialog_info('注册成功, 请重新登录！', function() {
+        dialog_info('注册成功, 请重新登录!', function() {
             $("#inputLoginRID").val(rid),
             $("#inputLoginPass").val(password),
             $('body > div > div.row > div > div.row > div > button:nth-child(1)').click();
         });
     })).fail((function(jqXHR) {
         dialog_warning('ID 已存在, 请修改后重试!'),
-        $('#formRegist > div:nth-child(1) > div.invalid-feedback').text('ID 已存在, 请修改后重试！'),
+        $('#formRegist > div:nth-child(1) > div.invalid-feedback').text('ID 已存在, 请修改后重试!'),
         $('#inputRegistRID').val(''),
         $('#inputRegistRID').focus()
     }))
 }
+$("#btnUserCenter").on("click", (function() {
+    window.location.href = '/user';
+})),
 $('#btnUserLR').on('click', function() {
-    if($(this).text() === '登录 / 注册' || !getCookie('name')) {
+    if($(this).text() === '登录 / 注册') {
         window.location.href = '/session';
+        return;
     }
-    else {
-        logoff();
-    }
+    logoff();
+}),
+$('#btnShowLogin').on('click', function() {
+    $('#formLogin').show(),
+    $('#formRegist').hide(),
+    $('#formRegist').removeClass('was-validated');
+}),
+$('#btnShowRegist').on('click', function() {
+    $('#formLogin').hide(),
+    $('#formRegist').show(),
+    $('#formLogin').removeClass('was-validated');
 }),
 $("#inputLoginRID").on("keypress", (function(event) {
     13 === event.keyCode && $("#inputLoginPass").focus();
@@ -346,26 +323,6 @@ $("#inputRegistPass").on("keypress", (function(event) {
 $("#btnRegist").on("click", (function() {
     regist();
 })),
-$("#btnUserCenter").on("click", (function() {
-    let role = getCookie('role');
-    switch(role) {
-        case '学生':
-            window.location.href = '/student';
-            break;
-        case '辅导员':
-            window.location.href = '/assistant';
-            break;
-        case '教务处':
-            window.location.href = '/office';
-            break;
-        case '考勤':
-            window.location.href = '/attendance';
-            break;
-        case '管理员':
-            window.location.href = '/admin';
-            break;
-    }
-})),
 $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disabled').on('click', function() {
     let ancestry = this.parentNode.parentNode.parentNode;
 
@@ -375,11 +332,7 @@ $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disab
     $(ancestry).children(`[data-itemcard-page="${this.getAttribute('data-itemcard-menu')}"]`).addClass('active');
 }),
 $(document).ready(function() {
-    let rid = getCookie('rid');
-    let name = getCookie('name');
-    if(rid && name) {
-        $('#btnUserLR').html('<i class="fa fa-user-circle me-2"></i>' + rid + ' ' + name),
-        $('#btnUserLR').removeClass('btn-secondary').addClass('btn-success');
+    if($('#btnUserLR').text() !== '登录 / 注册') {
         switch(window.location.pathname) {
             case '/':
             case '/login':
@@ -390,30 +343,6 @@ $(document).ready(function() {
         }
     }
 });
-function btnRevokeClick(self) {
-    let ancestry = self.parentNode.parentNode;
-    if(!ancestry) {
-        return dialog_error('操作失败，请联系管理员！');
-    }
-    let lid = $(ancestry).children().first().text();
-    if(!lid) {
-        return dialog_error('操作失败，请联系管理员！');
-    }
-    dialog_confirm("确定撤销申请吗?", () => {
-        let form = new FormData();
-        form.append('id', lid);
-        $.ajax({
-            url: "/student/leaves",
-            method: "DELETE",
-            mimeType: "multipart/form-data",
-            data: form
-        }).done((function(data) {
-            $('[data-itemcard-menu="2"]').click();
-        })).fail((function(jqXHR) {
-            dialog_error(JSON.parse(jqXHR.responseText).msg);
-        }));
-    });
-}
 function btnBrowseClick(self) {
     
 }
@@ -430,50 +359,118 @@ function getActiveRowData(table) {
 
 }
 function btnAdminDeleteStudentClick() {
-    let list = $(studentTable).bootstrapTable('getSelections');
-    console.log(list)
-    $.confirm({
-        title: '删除学生信息',
-        content: '<form id="test" class="my-2"> <div class="row"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="sid"> <label class="form-label float-start" for="sid">学号</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="department"> <label class="form-label" for="department">学部</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="faculty"> <label class="form-label" for="faculty">系别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="major"> <label class="form-label" for="major">专业</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="class"> <label class="form-label" for="class">班级</label> </div> </form>',
-        theme: 'bootstrap',
-        class: 'rounded',
-        buttons: {
-            submit: {
-                text: '提交',
-                btnClass: 'btn-primary',
-                action: function() {
-                    let sid = document.forms.test['sid'].value;
-                    let name = document.forms.test['name'].value;
-                    let gend = document.forms.test['gender'].value;
-                    let depa = document.forms.test['department'].value;
-                    let facu = document.forms.test['faculty'].value;
-                    let majo = document.forms.test['major'].value;
-                    let clas = document.forms.test['class'].value;
-                
-                    let form = new FormData();
-                    form.append('sid', sid);
-                    form.append('name', name);
-                    form.append('gender', gend);
-                    form.append('department', depa);
-                    form.append('faculty', facu);
-                    form.append('major', majo);
-                    form.append('class', clas);
-                    console.log(sid,name,gend,depa,facu,majo,clas);
-                },
-            },
-            cancel: {
-                text: '取消',
-                btnClass: 'btn-danger',
-                action: function() {
-
+    let list = $('#studentTable').bootstrapTable('getSelections');
+    if(list.length === 0) return dialog_warning('未选择任何数据!');
+    let arr1 = [];
+    for(row of list) {
+        arr1.push('<div class="col">' + row.sid + ' ' + row.name + "</div>");
+    }
+    let arr2 = [];
+    if(arr1.length % 2 === 0) {
+        for(i in arr1) {
+            if(i % 2 !== 0) {
+                arr2.push('<div class="row">' + arr1[i-1] + arr1[i] + '</div>')
+            }
+        }
+    }
+    else {
+        if(arr1.length === 1) {
+            arr2.push('<div class="row">' + arr1[0] + '</div>')
+        }
+        else {
+            arr2.push('<div class="row">' + arr1[0])
+            for(i in arr1) {
+                if(i > 0 && i % 2 === 0 && i !== arr1.length - 1) {
+                    arr2.push(arr1[i-1] + '</div><div class="row">' + arr1[i]);
                 }
+                if(i === arr1.length - 1) {
+                    arr2[arr2.length - 1] = arr2[arr2.length - 1] + arr1[arr1.length - 1] + '</div>';
+                }
+            }
+        }
+    }
+    let html = '<div class="container">' + arr2.join('') + '</div>';
+    dialog_confirm('警告', `<div class="my-1 text-center text-danger">确定要删除 ${list.length} 条数据吗, 该操作无法撤销!</div><br>` + html, () => {
+        let sids = [];
+        for(row of list) sids.push(row.sid);
+        let form = new FormData();
+        form.append('sids', sids);let settings = {
+            async: !1,
+            crossDomain: !0,
+            url: "/admin/students",
+            method: "delete",
+            headers: {
+                "cache-control": "no-cache"
             },
-        },
-    })
+            processData: !1,
+            contentType: !1,
+            mimeType: "multipart/form-data",
+            data: form
+        };
+        $.ajax(settings).done((function(data) {
+            $('#studentTable').bootstrapTable('refresh', {});
+        })).fail((function(jqXHR) {
+            let msg = JSON.parse(jqXHR.responseText).msg;
+            dialog_warning(msg);
+        }));
+    });
 }
 function btnAdminDeleteTeacherClick() {
-    let list = $(studentTable).bootstrapTable('getSelections');
-    console.log(list)
+    let list = $('#teacherTable').bootstrapTable('getSelections');
+    if(list.length === 0) return dialog_warning('未选择任何数据!');
+    let arr1 = [];
+    for(row of list) {
+        arr1.push('<div class="col">' + row.tid + ' ' + row.name + "</div>");
+    }
+    let arr2 = [];
+    if(arr1.length % 2 === 0) {
+        for(i in arr1) {
+            if(i % 2 !== 0) {
+                arr2.push('<div class="row">' + arr1[i-1] + arr1[i] + '</div>')
+            }
+        }
+    }
+    else {
+        if(arr1.length === 1) {
+            arr2.push('<div class="row">' + arr1[0] + '</div>')
+        }
+        else {
+            arr2.push('<div class="row">' + arr1[0])
+            for(i in arr1) {
+                if(i > 0 && i % 2 === 0 && i !== arr1.length - 1) {
+                    arr2.push(arr1[i-1] + '</div><div class="row">' + arr1[i]);
+                }
+                if(i === arr1.length - 1) {
+                    arr2[arr2.length - 1] = arr2[arr2.length - 1] + arr1[arr1.length - 1] + '</div>';
+                }
+            }
+        }
+    }
+    let html = '<div class="container">' + arr2.join('') + '</div>';
+    dialog_confirm('警告', `<div class="my-1 text-center text-danger">确定要删除 ${list.length} 条数据吗, 该操作无法撤销!</div><br>` + html, () => {
+        let tids = [];
+        for(row of list) tids.push(row.tid);
+        let form = new FormData();
+        form.append('tids', tids);let settings = {
+            async: !1,
+            crossDomain: !0,
+            url: "/admin/teachers",
+            method: "delete",
+            headers: {
+                "cache-control": "no-cache"
+            },
+            processData: !1,
+            contentType: !1,
+            mimeType: "multipart/form-data",
+            data: form
+        };
+        $.ajax(settings).done((function(data) {
+            $('#teacherTable').bootstrapTable('refresh', {});
+        })).fail((function(jqXHR) {
+            let msg = JSON.parse(jqXHR.responseText).msg;
+            dialog_warning(msg);
+        }));
+    });
 }
 function btnModifyStudentClick(self) {
     let dsid = $(self).attr('data-sid');
@@ -549,11 +546,11 @@ function btnModifyTeacherClick(self) {
 function btnModifyTeacherSubmitClick(self) {
     let ancestry = self.parentNode.parentNode;
     if(!ancestry) {
-        return dialog_error('操作失败，请联系管理员！');
+        return dialog_error('操作失败, 请联系管理员!');
     }
     let tid = $(ancestry).children().first().text();
     if(!tid) {
-        return dialog_error('操作失败，请联系管理员！');
+        return dialog_error('操作失败, 请联系管理员!');
     }
     let form = new FormData();
     form.append('id', tid);

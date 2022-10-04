@@ -1,0 +1,13 @@
+<div class="card">
+    <div class="card-body">
+        {% if headimg %}
+        <img class="card-img-top" src="{{ headimg }}" alt="user">
+        {% else %}
+        <img class="card-img-top" src="{{ url_for('static', filename='img/user_head/default.webp') }}" alt="user">
+        {% endif %}
+        <div class="headimg-over">
+            <i class="fa fa-camera text-white fs-1"></i>
+        </div>
+    </div>
+    <div class="card-footer text-center">{{ name }}</div>
+</div>

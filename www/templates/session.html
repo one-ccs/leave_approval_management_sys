@@ -27,8 +27,8 @@
             <div class="col-xxl-3 col-xl-4 col-lg-4 col-md-6 rounded" style="background-color: #ccccff; box-shadow: black 3px 5px 8px;">
                 <div class="row bg-light rounded-top">
                     <div class="col p-0">
-                        <button href="#" class="btn btn-light py-3 w-50 chooser" style="border: none;border-radius: 5px 0 0 0;font-size: 1.2rem;" onclick="$('#formLogin').show(),$('#formRegist').hide(),$('#formRegist').removeClass('was-validated')"><i class="fa fa-users me-2"></i>登录</button>
-                        <button href="#" class="btn btn-light py-3 w-50 chooser float-end" style="border: none;border-radius: 0 5px 0 0;font-size: 1.2rem;" onclick="$('#formLogin').hide(),$('#formRegist').show(),$('#formLogin').removeClass('was-validated')"><i class="fa fa-user-plus me-2"></i>注册</button>
+                        <button id="btnShowLogin" class="btn btn-light border-0 py-3 w-50 fs-5" style="border-radius: 5px 0 0 0;"><i class="fa fa-users me-2"></i>登录</button>
+                        <button id="btnShowRegist" class="btn btn-light border-0 py-3 w-50 fs-5 float-end" style="border-radius: 0 5px 0 0;"><i class="fa fa-user-plus me-2"></i>注册</button>
                     </div>
                 </div>
                 <div id="formLogin" class="p-4">

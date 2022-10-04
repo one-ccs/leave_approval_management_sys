@@ -26,22 +26,14 @@
             <div data-itemcard-page="1" class="itemcard-page active">
                 <div class="row h-100 flex-nowrap align-items-center justify-content-center">
                     <div class="col col-2 col-lg-2 col-sm-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <img class="card-img-top" src="{{ headimg }}" alt="user">
-                                <div class="headimg-over">
-                                    <i class="fa fa-camera text-white fs-6"></i>
-                                </div>
-                            </div>
-                            <div class="card-footer text-center">{{ name }}</div>
-                        </div>
+                        {% include 'includes/headcard.html' %}
                     </div>
                     <table class="col col-8 table table-striped table-bordered m-0" border="3" style="width: 30%;background-color: #fff;">
                         <thead>
                             <tr><th colspan="2">管理员信息</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>ID</td><td>{{ aid }}</td></tr>
+                            <tr><td>ID</td><td>{{ rid }}</td></tr>
                             <tr><td>姓名</td><td>{{ name }}</td></tr>
                             <tr><td>性别</td><td>{{ gender }}</td></tr>
                         </tbody>
@@ -126,7 +118,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
                     <button class="btn btn-primary" onclick="btnModifyStudentSubmitClick()">提交</button>
                 </div>
             </div>
@@ -172,7 +164,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
                     <button class="btn btn-primary" onclick="btnModifyTeacherSubmitClick()">提交</button>
                 </div>
             </div>
@@ -189,23 +181,27 @@
                 locale: 'zh-CN',
                 toolbar: '#studentToolbar',
                 toolbarAlign: 'left',
-                buttonsOrder: ['paginationSwitch', 'refresh', 'toggle', 'fullscreen', 'columns'],
-                pagination: true,
-                search: true,
-                searchTimeOut: 300,
-                showColumns: true,
-                minimumCountColumns: 3,
-                clickToSelect: true,
-                multipleSelectRow: true,
+                buttonsOrder: ['paginationSwitch', 'toggle', 'fullscreen', 'refresh', 'columns'],
                 showPaginationSwitch: true,
                 showToggle: true,
                 showFullscreen: true,
+                showRefresh: true,
+                showColumns: true,
+                showButtonText: false,
+                showHeader: true,
+                showFooter: false,
+                pagination: true,
+                search: true,
+                searchTimeOut: 300,
+                minimumCountColumns: 3,
+                clickToSelect: true,
+                multipleSelectRow: true,
                 detailView: true,
                 detailViewIcon: true,
-                sortable: true,
                 detailFormatter: function(index, row, element) {
                     return `${row.name} (${row.sid}) ${row.department} ${row.faculty} ${row.major} ${row.class}班`;
                 },
+                sortable: true,
                 url: '/admin/students',
                 columns: [{
                     field: 'select',
@@ -225,7 +221,7 @@
                 }, {
                     field: 'name', 
                     title: '姓名', 
-                    sortable: true
+                    sortable: true,
                 }, {
                     field: 'gender', 
                     title: '性别', 
@@ -234,15 +230,15 @@
                 }, {
                     field: 'department', 
                     title: '学部', 
-                    sortable: true
+                    sortable: true,
                 }, {
                     field: 'faculty', 
                     title: '系别', 
-                    sortable: true
+                    sortable: true,
                 }, {
                     field: 'major', 
                     title: '专业', 
-                    sortable: true
+                    sortable: true,
                 }, {
                     field: 'class', 
                     title: '班级', 
@@ -261,23 +257,27 @@
                 locale: 'zh-CN',
                 toolbar: '#teacherToolbar',
                 toolbarAlign: 'left',
-                buttonsOrder: ['paginationSwitch', 'refresh', 'toggle', 'fullscreen', 'columns'],
-                pagination: true,
-                search: true,
-                searchTimeOut: 300,
-                showColumns: true,
-                minimumCountColumns: 3,
-                clickToSelect: true,
-                multipleSelectRow: true,
+                buttonsOrder: ['paginationSwitch', 'toggle', 'fullscreen', 'refresh', 'columns'],
                 showPaginationSwitch: true,
                 showToggle: true,
                 showFullscreen: true,
+                showRefresh: true,
+                showColumns: true,
+                showButtonText: false,
+                showHeader: true,
+                showFooter: false,
+                pagination: true,
+                search: true,
+                searchTimeOut: 300,
+                minimumCountColumns: 3,
+                clickToSelect: true,
+                multipleSelectRow: true,
                 detailView: true,
                 detailViewIcon: true,
-                sortable: true,
                 detailFormatter: function(index, row, element) {
                     return `${row.name} ${row.telphone}`;
                 },
+                sortable: true,
                 url: '/admin/teachers',
                 columns: [{
                     checkbox: true, 
@@ -295,7 +295,7 @@
                 }, {
                     field: 'name', 
                     title: '姓名', 
-                    sortable: true
+                    sortable: true,
                 }, {
                     field: 'gender', 
                     title: '性别', 
@@ -309,7 +309,7 @@
                 }, {
                     field: 'role', 
                     title: '职能', 
-                    sortable: true
+                    sortable: true,
                 }],
                 totalField: 'length',
                 dataField: 'data',

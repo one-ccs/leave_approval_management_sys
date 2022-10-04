@@ -34,3 +34,21 @@ class Database:
         finally:
             connection.close()
         return result
+
+    def executemany(self, sql, args=()):
+        connection = sqlite3.connect(self.db_path)
+        result = None
+        try:
+            if sql[:6].lower() == 'select':
+                connection.row_factory = sqlite3.Row
+                result = connection.executemany(sql, args).fetchall()
+            if sql[:6].lower() in ('insert', 'delete', 'update'):
+                with connection:
+                    result = connection.executemany(sql, args).rowcount
+        except sqlite3.IntegrityError:
+            result = None
+        except sqlite3.Error as e:
+            raise e
+        finally:
+            connection.close()
+        return result

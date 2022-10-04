@@ -17,17 +17,14 @@
             <div data-itemcard-page="1" class="itemcard-page active">
                 <div class="row h-100 flex-nowrap align-items-center justify-content-center">
                     <div class="col col-2 col-lg-2 col-sm-3">
-                        <div class="card">
-                            <img class=" card-body rounded" src="{{ url_for('static', filename='img/user.webp') }}" alt="user">
-                            <div class="card-footer text-center">{{ name }}</div>
-                        </div>
+                        {% include 'includes/headcard.html' %}
                     </div>
                     <table class="col col-8 table table-striped table-bordered m-0" border="3" style="width: 66%;background-color: #fff;">
                         <thead>
                             <tr><th colspan="4">学生信息</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>学号</td><td>{{ sid }}</td><td>学部</td><td>{{ department }}</td></tr>
+                            <tr><td>学号</td><td>{{ rid }}</td><td>学部</td><td>{{ department }}</td></tr>
                             <tr><td>姓名</td><td>{{ name }}</td><td>系别</td><td>{{ faculty }}</td></tr>
                             <tr><td>性别</td><td>{{ gender }}</td><td>专业</td><td>{{ major }}</td></tr>
                             <tr><td>-</td><td>-</td><td>班级</td><td>{{ _class }}</td></tr>
@@ -36,20 +33,14 @@
                 </div>
             </div>
             <div data-itemcard-page="2" class="itemcard-page">
-                <div class="container-fluid">
-                    <div class="row pb-2 mb-2" style="border-bottom: 1px solid black;">
-                        <div class="col">
+                <div class="container">
+                    <div class="row">
+                        <div id="leaveToolbar" class="col button-group">
+                            <button class="btn btn-danger" id="btnRevoke">撤销申请<i class="fa fa-trash-o ms-2"></i></button>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLeaveModal">新建申请<i class="fa fa-plus-circle ms-2"></i></button>
                         </div>
+                        <table id="leaveTable" class="col"></table>
                     </div>
-                    <table id="table1" class="table table-striped table-bordered text-center mt-2" style="table-layout: fixed;">
-                        <thead>
-                            <tr><th>编号</th><th>申请日期</th><th>类别</th><th>开始日期</th><th>结束日期</th><th>原因</th><th>辅导员</th><th>教务处</th><th>状态</th><th>操作</th></tr>
-                        </thead>
-                        <tbody id="leaveList">
-                            <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td><button class="btn btn-danger btn-sm me-1 disabled"><i class="fa fa-close"></i></button></td></tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
             <div data-itemcard-page="3" class="itemcard-page">
@@ -91,7 +82,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
                     <button class="btn btn-primary" id="btnSubmit">提交</button>
                 </div>
             </div>
@@ -101,46 +92,131 @@
 
 {% block script %}
     <script>
-        let table1 = null;
-        $.fn.dataTable.ext.errMode = 'throw';
+        let leaveTable = null;
         $('[data-itemcard-menu="2"]').on('click', () => {
-            if(!table1) {
-                table1 = $('#table1').dataTable({
-                    processing: true,
-                    stateSave: true,
-                    language: {
-                        url: '/static/localisation/zh_CN.json'
+            if(leaveTable) return;
+            leaveTable = $('#leaveTable').bootstrapTable({
+                locale: 'zh-CN',
+                toolbar: '#leaveToolbar',
+                toolbarAlign: 'left',
+                buttonsOrder: ['paginationSwitch', 'refresh', 'toggle', 'fullscreen', 'columns'],
+                pagination: true,
+                search: true,
+                searchTimeOut: 300,
+                showColumns: true,
+                minimumCountColumns: 3,
+                clickToSelect: true,
+                multipleSelectRow: true,
+                showPaginationSwitch: true,
+                showToggle: true,
+                showFullscreen: true,
+                sortable: true,
+                rowStyle: function(row, index) {
+                    let classes = '', css = '';
+                    switch(row.state) {
+                        case '已完成':
+                            classes = 'table-success';
+                            break;
+                        case '待销假':
+                            classes = 'table-warning';
+                            break;
+                        case '待审批':
+                        case '审批中':
+                            classes = 'table-info';
+                            break;
+                        case '已撤回':
+                            classes = 'table-light';
+                            break;
+                        case '已驳回':
+                            classes = 'table-danger';
+                            break;
+                    }
+                    return {
+                        classes: classes,
+                        css: css,
+                    }
+                },
+                url: '/student/leaves',
+                columns: [{
+                    field: 'radio',
+                    title: '单选',
+                    radio: true,
+                }, {
+                    field: 'id', 
+                    title: '编号', 
+                    sortable: true,
+                    align: 'center',
+                    width: 1,
+                }, {
+                    field: 'apply_timestamp', 
+                    title: '申请日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'category', 
+                    title: '类别', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'start_timestamp', 
+                    title: '开始日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'end_timestamp', 
+                    title: '结束日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'reason', 
+                    title: '原因', 
+                    sortable: true,
+                }, {
+                    field: 'a1', 
+                    title: '辅导员审批', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'a2', 
+                    title: '教务处审批', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'state', 
+                    title: '状态', 
+                    sortable: true,
+                    align: 'center', 
+                }],
+                totalField: 'length',
+                dataField: 'data',
+                idField: 'sid',
+            });
+        }),
+        $('#btnRevoke').on('click', function() {
+            let leave = $('#leaveTable').bootstrapTable('getSelections').at(0);
+            if(!leave) return dialog_warning('未选择任何数据！');
+            if(leave.state !== '审批中' && leave.state !== '待审批') return dialog_warning('无法撤回该请假条!');
+            dialog_confirm('撤销申请', "确定撤销申请吗?", () => {
+                let form = new FormData();
+                form.append('id', leave.id);
+                $.ajax({
+                    async: !1,
+                    crossDomain: !0,
+                    type: 'delete',
+                    url: '/student/leaves',
+                    headers: {
+                        "cache-control": "no-cache"
                     },
-                    columns: [
-                        {'data': 'id'},
-                        {'data': 'apply_datetime'},
-                        {'data': 'category'},
-                        {'data': 'start_datetime'},
-                        {'data': 'end_datetime'},
-                        {'data': 'reason'},
-                        {'data': 'a1'},
-                        {'data': 'a2'},
-                        {'data': 'state'},
-                        {'data': 'action'},
-                    ],
-                    columnDefs: [
-                        {'width': '5%', 'targets': 0},
-                        {'width': '15%', 'targets': 1},
-                        {'width': '6%', 'targets': 2},
-                        {'width': '15%', 'targets': 3},
-                        {'width': '15%', 'targets': 4},
-                        {'width': '25%', 'targets': 5},
-                        {'width': '6%', 'targets': 6},
-                        {'width': '6%', 'targets': 7},
-                        {'width': '6%', 'targets': 8},
-                        {'width': '5%', 'targets': 9},
-                    ],
-                    ajax: '/student/leaves',
-                });
-            }
-            else {
-                table1.api().ajax.reload();
-            }
+                    processData: !1,
+                    contentType: !1,
+                    mimeType: "multipart/form-data",
+                    data: form
+                }).done((function(data) {
+                    $('#leaveTable').bootstrapTable('refresh', {});
+                })).fail((function(jqXHR) {
+                    dialog_error(JSON.parse(jqXHR.responseText).msg);
+                }));
+            });
         }),
         $('#btnSubmit').on('click', function() {
             let category = $('#inputCategory').val(), sd = $('#inputStartDatatime').val(), ed = $('#inputEndDatetime').val(), reason = $('#inputReason').val();
@@ -149,8 +225,8 @@
             }
             let form = new FormData();
             form.append('category', category),
-            form.append('start_datetime', sd),
-            form.append('end_datetime', ed),
+            form.append('start_timestamp', sd),
+            form.append('end_timestamp', ed),
             form.append('reason', reason);
             $.ajax({
                 async: !1,
@@ -166,21 +242,9 @@
                 data: form
             }).done(() => {
                 $(this).siblings().first().click(),
-                $('[data-itemcard-menu="2"]').click();
+                $('#leaveTable').bootstrapTable('refresh', {});
             }).fail(function(data) {
-                $.confirm({
-                    theme: "bootstrap",
-                    type: "red",
-                    title: "",
-                    content: '<span class="fileitemTr">' + '操作失败，请联系管理员' + "</span>",
-                    autoClose: "cancelAction|2000",
-                    buttons: {
-                        cancelAction: {
-                            text: '关闭',
-                            action: function() {}
-                        }
-                    }
-                });
+                dialog_error('操作失败，请联系管理员!');
             });
         });
     </script>

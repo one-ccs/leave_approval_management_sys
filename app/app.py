@@ -1,27 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from flask import Flask, request, session, make_response, render_template, send_file, url_for
+from flask import Flask, request, session, make_response, render_template, url_for, redirect
 from datetime import timedelta
-from urllib.parse import quote
 from app.classes import Database, Role
 
 app = Flask(__name__, template_folder='../www/templates', static_folder='../www/static')
-app.config['SECRET_KEY'] = 'hard to guess'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=1800 + 3600 * 8)
+app.config['SECRET_KEY'] = 'LmzwTvA1p5B2DODi$b2bfe2b68ef2ec99b86dd354e00d3c3c7f533ce18fe8a6f33f7c3af52396b1bb'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=1800)
 db = Database('./db/data.db')
 
+@app.before_request
+def check_login():
+    if 'role' not in session:
+        session.clear()
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_file('../www/static/favicon.ico', mimetype='image/jpeg')
+    return redirect(url_for('static', filename='favicon.ico'))
 
 @app.route('/')
 def root():
-    return render_template('/index.html')
+    args = session.get('role', {})
+    return render_template('/index.html', **args)
 
 @app.route('/session')
 def _session():
-    return render_template('/session.html')
+    args = session.get('role', {})
+    return render_template('/session.html', **args)
 
 @app.route('/login', methods=['GET', 'POST', 'DELETE'])
 def login():
@@ -51,30 +56,22 @@ def login():
             if not role.check_password(result['password']):
                 res =  make_response({'state': 'fail', 'msg': '密码错误'}, 403)
             else:
-                session[role.rid] = {
+                session['role'] = {
                     'rid': result['rid'],
                     'name': result['name'],
                     'password': result['password'],
                     'role': result['role']
                 }
-                session.permanent = True
                 res = make_response({'state': 'ok', 'msg': '登录成功'}, 200)
-                res.set_cookie('rid', str(result['rid']))
-                res.set_cookie('name', quote(result['name']))
-                res.set_cookie('role', quote(result['role']))
         else:
             res = make_response({'state': 'fail', 'msg': '用户信息查询失败, 请联系管理员'}, 500)
     # 登出
     if request.method == 'DELETE':
-        rid = request.cookies.get('rid')
-        if not rid or rid not in session:
+        if 'role' not in session:
             res = make_response({'state': 'fail', 'msg': '请登录后操作'}, 403)
         else:
             session.clear()
             res = make_response({'state': 'ok', 'msg': '登出成功'}, 200)
-            res.delete_cookie('rid')
-            res.delete_cookie('name')
-            res.delete_cookie('role')
     return res
 
 @app.route('/regist', methods=['GET', 'POST'])
@@ -103,6 +100,23 @@ def regist():
                 res = make_response({'state': 'fail', 'msg': '注册失败, ID 已存在, 请修改后重试'}, 403)
         else:
             res = make_response({'state': 'fail', 'msg': '注册失败, ID 已存在, 请修改后重试'}, 403)
+    return res
+
+@app.route('/user')
+def user():
+    if 'role' not in session:
+        return redirect('/session')
+    res, role = None, session.get('role')['role']
+    if role == '学生':
+        res = redirect('/student/')
+    elif role == '辅导员':
+        res = redirect('/assistant/')
+    elif role == '教务处':
+        res = redirect('/office/')
+    elif role == '考勤':
+        res = redirect('/attendance/')
+    elif role == '管理员':
+        res = redirect('/admin/')
     return res
 
 @app.route('/headimg', methods=['POST'])
