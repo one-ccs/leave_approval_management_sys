@@ -45,8 +45,8 @@
                     <div class="row">
                         <div id="studentToolbar" class="col button-group">
                             <button class="btn btn-danger" onclick="btnAdminDeleteStudentClick()">删除<i class="fa fa-trash-o ms-2"></i></button>
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" onclick="btnModifyStudentClick()">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modifyStudentModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
+                            <button class="btn btn-warning" id="btnStudentModify">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
+                            <button class="btn btn-primary" id="btnStudentAdd">添加<i class="fa fa-plus-circle ms-2"></i></button>
                         </div>
                         <table id="studentTable" class="col"></table>
                     </div>
@@ -57,8 +57,8 @@
                     <div class="row">
                         <div id="teacherToolbar" class="col button-group">
                                 <button class="btn btn-danger" onclick="btnAdminDeleteTeacherClick()">删除<i class="fa fa-trash-o ms-2"></i></button>
-                                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal" onclick="btnModifyStudentClick(this)">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modifyTeacherModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
+                                <button class="btn btn-warning" id="btnTeacherModify">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
+                                <button class="btn btn-primary" id="btnTeacherAdd">添加<i class="fa fa-plus-circle ms-2"></i></button>
                         </div>
                         <table id="teacherTable" class="col"></table>
                     </div>
@@ -66,117 +66,6 @@
             </div>
             <div data-itemcard-page="4" class="itemcard-page">
                 设置
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modifyStudentModal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">修改学生信息</div>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="modifyStudentForm" class="container rounded mx-auto">
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-floating">
-                                    <input class="form-control" type="text" name="sid">
-                                    <label class="form-label float-start" for="sid">学号</label>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-floating">
-                                    <input class="form-control" type="text" name="name">
-                                    <label class="form-label" for="name">姓名</label>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-floating">
-                                    <input class="form-control" type="text" name="gender">
-                                    <label class="form-label" for="gender">性别</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-floating mt-3">
-                            <input class="form-control" type="text" name="department">
-                            <label class="form-label" for="department">学部</label>
-                        </div>
-                        <div class="form-floating mt-3">
-                            <input class="form-control" type="text" name="faculty">
-                            <label class="form-label" for="faculty">系别</label>
-                        </div>
-                        <div class="form-floating mt-3">
-                            <input class="form-control" type="text" name="major">
-                            <label class="form-label" for="major">专业</label>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col">
-                                <div class="form-floating">
-                                    <input class="form-control" type="text" name="grade">
-                                    <label class="form-label" for="grade">年级</label>
-                                </div>
-                            </div>
-                            <dic class="col">
-                                <div class="form-floating">
-                                    <input class="form-control" type="text" name="class">
-                                    <label class="form-label" for="class">班级</label>
-                                </div>
-                            </dic>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                    <button class="btn btn-primary" onclick="btnModifyStudentSubmitClick()">提交</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="modifyTeacherModal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">修改教师信息</div>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="modifyTeacherForm" class="container rounded mx-auto">
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-floating mt-3">
-                                    <input class="form-control" type="text" name="tid">
-                                    <label class="form-label" for="tid">ID</label>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-floating mt-3">
-                                    <input class="form-control" type="text" name="name">
-                                    <label class="form-label" for="name">姓名</label>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-floating mt-3">
-                                    <input class="form-control" type="text" name="gender">
-                                    <label class="form-label" for="gender">性别</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-floating mt-3">
-                            <input class="form-control" type="text" name="telphone">
-                            <label class="form-label" for="telphone">电话号码</label>
-                        </div>
-                        <div class="form-floating mt-3">
-                            <input class="form-control" type="text" name="role">
-                            <label class="form-label" for="role">职能</label>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                    <button class="btn btn-primary" onclick="btnModifyTeacherSubmitClick()">提交</button>
-                </div>
             </div>
         </div>
     </div>
@@ -265,7 +154,32 @@
                 idField: 'sid',
                 uniqueId: 'sid',
             });
-            bindDragSelectEvent(studentTable, 'sid');
+            bindDragSelectEvent(studentTable, 'sid'),
+            createConfirmModal({
+                $button: $('#btnStudentModify'),
+                indirectButton: true,
+                id: 'modifyStudentModal',
+                title: '修改学生信息',
+                body: '<form id="modifyStudentForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="sid"> <label class="form-label float-start" for="sid">学号</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="department"> <label class="form-label" for="department">学部</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="faculty"> <label class="form-label" for="faculty">系别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="major"> <label class="form-label" for="major">专业</label> </div> <div class="row mt-3"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="grade"> <label class="form-label" for="grade">年级</label> </div> </div> <dic class="col"> <div class="form-floating"> <input class="form-control" type="text" name="class"> <label class="form-label" for="class">班级</label> </div> </dic> </div> </form>',
+                buttonClick: function(e, $modal, $button) {
+                    btnModifyStudentClick(e, $modal, $button);
+                },
+                confirmClick: function() {
+
+                },
+            }),
+            createConfirmModal({
+                $button: $('#btnStudentAdd'),
+                id: 'addStudentModal',
+                title: '添加学生信息',
+                body: '<form id="addStudentForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="sid"> <label class="form-label float-start" for="sid">学号</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="department"> <label class="form-label" for="department">学部</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="faculty"> <label class="form-label" for="faculty">系别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="major"> <label class="form-label" for="major">专业</label> </div> <div class="row mt-3"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="grade"> <label class="form-label" for="grade">年级</label> </div> </div> <dic class="col"> <div class="form-floating"> <input class="form-control" type="text" name="class"> <label class="form-label" for="class">班级</label> </div> </dic> </div> </form>',
+                buttonClick: function() {
+
+                },
+                confirmClick: function() {
+
+                },
+            });
         }),
         $('[data-itemcard-menu="3"]').on('click', () => {
             if(teacherTable)  return;
@@ -332,7 +246,32 @@
                 idField: 'tid',
                 uniqueId: 'tid',
             });
-            bindDragSelectEvent(teacherTable, 'tid');
+            bindDragSelectEvent(teacherTable, 'tid'),
+            createConfirmModal({
+                $button: $('#btnTeacherModify'),
+                indirectButton: true,
+                id: 'modifyTeacherModal',
+                title: '修改教师信息',
+                body: '<form id="modifyTeacherForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="tid"> <label class="form-label" for="tid">ID</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="telphone"> <label class="form-label" for="telphone">电话号码</label> </div> <div class="form-floating mt-3"> <select class="form-select" name="role"> <option value="辅导员">辅导员</option> <option value="教务处">教务处</option> <option value="考勤">考勤</option> </select> <label class="form-label float-start" for="role">职能</label> </div> </form>',
+                buttonClick: function(e, $modal, $button) {
+                    btnModifyTeacherClick(e, $modal, $button);
+                },
+                confirmClick: function() {
+
+                },
+            }),
+            createConfirmModal({
+                $button: $('#btnTeacherAdd'),
+                id: 'addTeacherModal',
+                title: '添加教师信息',
+                body: '<form id="addTeacherForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="tid"> <label class="form-label" for="tid">ID</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="telphone"> <label class="form-label" for="telphone">电话号码</label> </div> <div class="form-floating mt-3"> <select class="form-select" name="role"> <option value="辅导员">辅导员</option> <option value="教务处">教务处</option> <option value="考勤">考勤</option> </select> <label class="form-label float-start" for="role">职能</label> </div> </form>',
+                buttonClick: function() {
+
+                },
+                confirmClick: function() {
+
+                },
+            });
         });
     </script>
 {% endblock %}

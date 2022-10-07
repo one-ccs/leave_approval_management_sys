@@ -1,4 +1,4 @@
-function dialog_info(msg, callback=function(){}, dismiss=true) {
+function dialogInfo(msg, callback=function(){}, dismiss=true) {
     return $.confirm({
         title: "提示",
         content: '<span class="fileitemTr">' + msg + "</span>",
@@ -15,7 +15,7 @@ function dialog_info(msg, callback=function(){}, dismiss=true) {
         }
     });
 }
-function dialog_warning(msg, callback=function(){}, dismiss=true) {
+function dialogWarning(msg, callback=function(){}, dismiss=true) {
     return $.confirm({
         title: "警告",
         content: '<span class="fileitemTr">' + msg + "</span>",
@@ -32,7 +32,7 @@ function dialog_warning(msg, callback=function(){}, dismiss=true) {
         }
     });
 }
-function dialog_error(msg, callback=function(){}, dismiss=false) {
+function dialogError(msg, callback=function(){}, dismiss=false) {
     return $.confirm({
         title: "错误",
         content: '<span class="fileitemTr">' + msg + "</span>",
@@ -49,7 +49,7 @@ function dialog_error(msg, callback=function(){}, dismiss=false) {
         }
     });
 }
-function dialog_confirm(title, msg, confirm=function(){}, cancel=function(){}) {
+function dialogConfirm(title, msg, confirm=function(){}, cancel=function(){}) {
     $.confirm({
         title: title,
         content: '<span class="fileitemTr">' + msg + "</span>",
@@ -68,6 +68,57 @@ function dialog_confirm(title, msg, confirm=function(){}, cancel=function(){}) {
             }
         }
     });
+}
+function createConfirmModal(kw={}) {
+    let args = ['$button', 'indirectButton', 'id', 'title', 'body', 'buttonClick', 'confirmClick', 'cancelClick'];
+    for(let k in kw) if(args.indexOf(k) < 0) throw new ReferenceError(`无法识别的关键字 "${k}".`);
+
+    let $button = kw.$button || $();
+    let id = kw.id || `_${(new Date()).valueOf()}_${parseInt(Math.random() * 1000)}`;
+    let indirectButton = kw.indirectButton === undefined? false: true;
+    let title = kw.title || '标题';
+    let body = kw.body || '内容';
+    let buttonClick = kw.buttonClick || function(){};
+    let confirmClick = kw.confirmClick || function(){};
+    let cancelClick = kw.cancelClick || function(){};
+
+    let $modal = $(document.createElement('div'));
+    $modal.attr('id', id),
+    $modal.addClass('modal fade'),
+    $modal.attr('role', 'dialog');
+    $modal.setTitle = function(title) {
+        $(this).find('.modal-title').html(title);
+    };
+
+    if(indirectButton) {
+        let $_btn = $(document.createElement('button'));
+        $_btn.attr('data-bs-toggle', 'modal'),
+        $_btn.attr('data-bs-target', `#${id}`),
+        $button.on('click', e => buttonClick(e, $modal, $_btn)),
+        $(document.body).append($_btn);
+        $modal.show = () => {
+            if(!$modal.hasClass('show')) {
+                $_btn.click();
+            }
+        };
+        $modal.hide = () => {
+            if($modal.hasClass('show')) {
+                $_btn.click();
+            }
+        };
+    }
+    else {
+        $button.attr('data-bs-toggle', 'modal'),
+        $button.attr('data-bs-target', `#${id}`),
+        $button.on('click', e => buttonClick(e, $modal, $button));
+    }
+
+    $modal.html(`<div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div class="modal-title">${title}</div> <button class="btn-close" data-bs-dismiss="modal"></button> </div> <div class="modal-body">${body}</div> <div class="modal-footer"> <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button> <button class="btn btn-primary">提交</button> </div> </div> </div>`);
+    $btnCancel = $modal.find('div.modal-footer > button.btn.btn-secondary');
+    $btnConfirm = $modal.find('div.modal-footer > button.btn.btn-primary');
+    $btnCancel.on('click', e => cancelClick(e, $modal, $btnCancel)),
+    $btnConfirm.on('click', e => confirmClick(e, $modal, $btnConfirm)),
+    $(document.body).append($modal);
 }
 function bindDragSelectEvent($table, uniqueid) {
     $($table).on('mousedown', function(e) {
@@ -98,7 +149,7 @@ function bindDragSelectEvent($table, uniqueid) {
                 $table.bootstrapTable('checkBy', {field: uniqueid, values: checks});
             });
             $(element).on('mouseleave', (e) => {
-                if(!$table.selector.drag) return; 
+                if(!$table.selector.drag) return;
                 let _uniqueid = $(e.currentTarget).attr('data-uniqueid');
                 let originY = $table.selector.y;
                 let unchecks = [];
@@ -188,7 +239,7 @@ function login() {
     $('#formLogin').addClass('was-validated');
     let rid = $("#inputLoginRID").val(), password = $("#inputLoginPass").val();
     if (!rid || !password) {
-        return dialog_warning('ID 和密码不能为空!');
+        return dialogWarning('ID 和密码不能为空!');
     }
     let form = new FormData();
     form.append("rid", rid),
@@ -220,20 +271,20 @@ function login() {
                 $("#inputLoginRID").val('');
                 break;
         }
-        dialog_warning(msg);
+        dialogWarning(msg);
     }));
 }
 function logoff() {
-    dialog_confirm('登出', "确定退出登录?", function() {
+    dialogConfirm('登出', "确定退出登录?", function() {
         $.ajax({
             url: "/login",
             method: "DELETE",
         }).done(((data) => {
-            dialog_info('登出成功, 即将返回首页...', function() {
+            dialogInfo('登出成功, 即将返回首页...', function() {
                 window.location.href = '/';
             }, false);
         })).fail((function(jqXHR) {
-            dialog_error(JSON.parse(jqXHR.responseText).msg);
+            dialogError(JSON.parse(jqXHR.responseText).msg);
         }));
     });
 }
@@ -241,7 +292,7 @@ function regist() {
     $('#formRegist').addClass('was-validated');
     let rid = $('#inputRegistRID').val(), username = $("#inputRegistName").val(), password = $("#inputRegistPass").val();
     if (!rid || !username || !password) {
-        return dialog_warning('ID、姓名和密码不能为空!');
+        return dialogWarning('ID、姓名和密码不能为空!');
     }
     let form = new FormData();
     form.append("rid", rid),
@@ -261,13 +312,13 @@ function regist() {
         data: form
     };
     $.ajax(settings).done((function(data) {
-        dialog_info('注册成功, 请重新登录!', function() {
+        dialogInfo('注册成功, 请重新登录!', function() {
             $("#inputLoginRID").val(rid),
             $("#inputLoginPass").val(password),
             $('body > div > div.row > div > div.row > div > button:nth-child(1)').click();
         });
     })).fail((function(jqXHR) {
-        dialog_warning('ID 已存在, 请修改后重试!'),
+        dialogWarning('ID 已存在, 请修改后重试!'),
         $('#formRegist > div:nth-child(1) > div.invalid-feedback').text('ID 已存在, 请修改后重试!'),
         $('#inputRegistRID').val(''),
         $('#inputRegistRID').focus()
@@ -335,7 +386,7 @@ $(document).ready(function() {
     }
 });
 function btnBrowseClick(self) {
-    
+
 }
 function btnRejectClick(self) {
 
@@ -351,7 +402,7 @@ function getActiveRowData($table) {
 }
 function btnAdminDeleteStudentClick() {
     let list = $('#studentTable').bootstrapTable('getSelections');
-    if(list.length === 0) return dialog_warning('未选择任何数据!');
+    if(list.length === 0) return dialogWarning('未选择任何数据!');
     let arr1 = [];
     for(row of list) {
         arr1.push('<div class="col">' + row.sid + ' ' + row.name + "</div>");
@@ -381,7 +432,7 @@ function btnAdminDeleteStudentClick() {
         }
     }
     let html = '<div class="container">' + arr2.join('') + '</div>';
-    dialog_confirm('警告', `<div class="my-1 text-center text-danger">确定要删除 ${list.length} 条数据吗, 该操作无法撤销!</div><br>` + html, () => {
+    dialogConfirm('警告', `<div class="my-1 text-center text-danger">确定要删除 ${list.length} 条数据吗, 该操作无法撤销!</div><br>` + html, () => {
         let sids = [];
         for(row of list) sids.push(row.sid);
         let form = new FormData();
@@ -402,13 +453,13 @@ function btnAdminDeleteStudentClick() {
             $('#studentTable').bootstrapTable('refresh', {});
         })).fail((function(jqXHR) {
             let msg = JSON.parse(jqXHR.responseText).msg;
-            dialog_warning(msg);
+            dialogWarning(msg);
         }));
     });
 }
 function btnAdminDeleteTeacherClick() {
     let list = $('#teacherTable').bootstrapTable('getSelections');
-    if(list.length === 0) return dialog_warning('未选择任何数据!');
+    if(list.length === 0) return dialogWarning('未选择任何数据!');
     let arr1 = [];
     for(row of list) {
         arr1.push('<div class="col">' + row.tid + ' ' + row.name + "</div>");
@@ -438,7 +489,7 @@ function btnAdminDeleteTeacherClick() {
         }
     }
     let html = '<div class="container">' + arr2.join('') + '</div>';
-    dialog_confirm('警告', `<div class="my-1 text-center text-danger">确定要删除 ${list.length} 条数据吗, 该操作无法撤销!</div><br>` + html, () => {
+    dialogConfirm('警告', `<div class="my-1 text-center text-danger">确定要删除 ${list.length} 条数据吗, 该操作无法撤销!</div><br>` + html, () => {
         let tids = [];
         for(row of list) tids.push(row.tid);
         let form = new FormData();
@@ -459,14 +510,15 @@ function btnAdminDeleteTeacherClick() {
             $('#teacherTable').bootstrapTable('refresh', {});
         })).fail((function(jqXHR) {
             let msg = JSON.parse(jqXHR.responseText).msg;
-            dialog_warning(msg);
+            dialogWarning(msg);
         }));
     });
 }
-function btnModifyStudentClick(self) {
+function btnModifyStudentClick(e, $modal, $button) {
     let list = $('#studentTable').bootstrapTable('getSelections');
-    if(list.length === 0) return dialog_warning('未选择任何数据!');
-    document.forms.modifyStudentForm.reset(),
+    if(list.length === 0) return dialogWarning('未选择任何数据!');
+    $modal.show();
+    if(list.length > 1) $modal.setTitle(`批量修改学生数据 (共 ${list.length} 个)`);
     $(document.forms.modifyStudentForm['sid']).removeAttr('disabled'),
     $(document.forms.modifyStudentForm['name']).removeAttr('disabled'),
     $(document.forms.modifyStudentForm['gender']).removeAttr('disabled');
@@ -476,14 +528,14 @@ function btnModifyStudentClick(self) {
             $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true'),
             $(document.forms.modifyStudentForm['name']).attr('disabled', 'true'),
             $(document.forms.modifyStudentForm['gender']).attr('disabled', 'true'),
-            document.forms.modifyStudentForm['sid'].value = '多个值',
-            document.forms.modifyStudentForm['name'].value = '多个值',
+            document.forms.modifyStudentForm['sid'].value    = '多个值',
+            document.forms.modifyStudentForm['name'].value   = '多个值',
             document.forms.modifyStudentForm['gender'].value = '多个值';
         }
         else {
             $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true'),
-            document.forms.modifyStudentForm['sid'].value = row.sid;
-            document.forms.modifyStudentForm['name'].value = row.name;
+            document.forms.modifyStudentForm['sid'].value    = row.sid;
+            document.forms.modifyStudentForm['name'].value   = row.name;
             document.forms.modifyStudentForm['gender'].value = row.gender;
         }
         document.forms.modifyStudentForm['department'].value = row.department;
@@ -523,36 +575,50 @@ function btnModifyStudentSubmitClick(self) {
         mimeType: "multipart/form-data",
         data: form
     }).done((function(data) {
-        dialog_info('修改成功, 请刷新页面查看');
+        dialogInfo('修改成功, 请刷新页面查看');
     })).fail((function(jqXHR) {
-        dialog_error(JSON.parse(jqXHR.responseText).msg);
+        dialogError(JSON.parse(jqXHR.responseText).msg);
     }));
 }
-function btnModifyTeacherClick(self) {
-    let dtid = $(self).attr('data-tid');
-    let row = null;
-    for(_row of teacherTable.get(0).rows) {
-        if($(_row.cells.item(1)).text() === dtid) {
-            row = _row;
-            break;
-        }
-    }
+function btnModifyTeacherClick(e, $modal, $button) {
+    let list = $('#teacherTable').bootstrapTable('getSelections');
+    if(list.length === 0) return dialogWarning('未选择任何数据!');
+    $modal.show();
+    if(list.length > 1) $modal.setTitle(`批量修改教师数据 (共 ${list.length} 个)`);
+    $(document.forms.modifyTeacherForm['tid']).removeAttr('disabled'),
+    $(document.forms.modifyTeacherForm['name']).removeAttr('disabled'),
+    $(document.forms.modifyTeacherForm['gender']).removeAttr('disabled');
+    $(document.forms.modifyTeacherForm['telphone']).removeAttr('disabled');
+    let row = list[0];
     if(row) {
-        document.forms.modifyTeacherForm['tid'].value      = $(row.cells.item(1)).text();
-        document.forms.modifyTeacherForm['name'].value     = $(row.cells.item(2)).text();
-        document.forms.modifyTeacherForm['gender'].value   = $(row.cells.item(3)).text();
-        document.forms.modifyTeacherForm['telphone'].value = $(row.cells.item(4)).text();
-        document.forms.modifyTeacherForm['role'].value     = $(row.cells.item(5)).text();
+        if(list.length > 1) {
+            $(document.forms.modifyTeacherForm['tid']).attr('disabled', 'true'),
+            $(document.forms.modifyTeacherForm['name']).attr('disabled', 'true'),
+            $(document.forms.modifyTeacherForm['gender']).attr('disabled', 'true'),
+            $(document.forms.modifyTeacherForm['telphone']).attr('disabled', 'true'),
+            document.forms.modifyTeacherForm['tid'].value      = '多个值',
+            document.forms.modifyTeacherForm['name'].value     = '多个值',
+            document.forms.modifyTeacherForm['gender'].value   = '多个值';
+            document.forms.modifyTeacherForm['telphone'].value = '多个值';
+        }
+        else {
+            $(document.forms.modifyTeacherForm['tid']).attr('disabled', 'true'),
+            document.forms.modifyTeacherForm['tid'].value      = row.tid;
+            document.forms.modifyTeacherForm['name'].value     = row.name;
+            document.forms.modifyTeacherForm['gender'].value   = row.gender;
+            document.forms.modifyTeacherForm['telphone'].value = row.telphone;
+        }
+        document.forms.modifyTeacherForm['role'].value = row.role;
     }
 }
 function btnModifyTeacherSubmitClick(self) {
     let ancestry = self.parentNode.parentNode;
     if(!ancestry) {
-        return dialog_error('操作失败, 请联系管理员!');
+        return dialogError('操作失败, 请联系管理员!');
     }
     let tid = $(ancestry).children().first().text();
     if(!tid) {
-        return dialog_error('操作失败, 请联系管理员!');
+        return dialogError('操作失败, 请联系管理员!');
     }
     let form = new FormData();
     form.append('id', tid);
@@ -569,8 +635,8 @@ function btnModifyTeacherSubmitClick(self) {
         mimeType: "multipart/form-data",
         data: form
     }).done((function(data) {
-        dialog_info('修改成功, 请刷新页面查看');
+        dialogInfo('修改成功, 请刷新页面查看');
     })).fail((function(jqXHR) {
-        dialog_error(JSON.parse(jqXHR.responseText).msg);
+        dialogError(JSON.parse(jqXHR.responseText).msg);
     }));
 }
