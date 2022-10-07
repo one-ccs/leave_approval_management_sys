@@ -58,6 +58,7 @@ def students():
                     'department': row['department'],
                     'faculty': row['faculty'],
                     'major': row['major'],
+                    'grade': row['grade'],
                     'class': row['class'],
                 })
             res = make_response(dict, 200)
@@ -70,9 +71,10 @@ def students():
         depa = request.form.get('department')
         facu = request.form.get('faculty')
         majo = request.form.get('major')
+        grad = request.form.get('grade')
         clas = request.form.get('class')
         try:
-            stu = Student(name, 'None', sid, gend, depa, facu, majo, clas)
+            stu = Student(name, 'None', sid, gend, depa, facu, majo, grad, clas)
             stu.id = session.get(stu.sid)['id']
         except ValueError:
             return make_response({'state': 'fail', 'msg': '学号和姓名不能为空'}, 403)

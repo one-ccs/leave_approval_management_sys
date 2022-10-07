@@ -45,7 +45,7 @@
                     <div class="row">
                         <div id="studentToolbar" class="col button-group">
                             <button class="btn btn-danger" onclick="btnAdminDeleteStudentClick()">删除<i class="fa fa-trash-o ms-2"></i></button>
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" onclick="btnModifyStudentClick(this)">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modifyStudentModal" onclick="btnModifyStudentClick()">修改<i class="fa fa-pencil-square-o ms-2"></i></button>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modifyStudentModal">添加<i class="fa fa-plus-circle ms-2"></i></button>
                         </div>
                         <table id="studentTable" class="col"></table>
@@ -111,9 +111,19 @@
                             <input class="form-control" type="text" name="major">
                             <label class="form-label" for="major">专业</label>
                         </div>
-                        <div class="form-floating mt-3">
-                            <input class="form-control" type="text" name="class">
-                            <label class="form-label" for="class">班级</label>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <div class="form-floating">
+                                    <input class="form-control" type="text" name="grade">
+                                    <label class="form-label" for="grade">年级</label>
+                                </div>
+                            </div>
+                            <dic class="col">
+                                <div class="form-floating">
+                                    <input class="form-control" type="text" name="class">
+                                    <label class="form-label" for="class">班级</label>
+                                </div>
+                            </dic>
                         </div>
                     </form>
                 </div>
@@ -240,6 +250,11 @@
                     title: '专业', 
                     sortable: true,
                 }, {
+                    field: 'grade', 
+                    title: '年级', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
                     field: 'class', 
                     title: '班级', 
                     sortable: true,
@@ -248,8 +263,9 @@
                 totalField: 'length',
                 dataField: 'data',
                 idField: 'sid',
+                uniqueId: 'sid',
             });
-            bindDragSelectEvent(studentTable.get(0), $('#studentTable').bootstrapTable, 'sid');
+            bindDragSelectEvent(studentTable, 'sid');
         }),
         $('[data-itemcard-menu="3"]').on('click', () => {
             if(teacherTable)  return;
@@ -314,8 +330,9 @@
                 totalField: 'length',
                 dataField: 'data',
                 idField: 'tid',
+                uniqueId: 'tid',
             });
-            bindDragSelectEvent(teacherTable.get(0), $('#teacherTable').bootstrapTable, 'tid');
+            bindDragSelectEvent(teacherTable, 'tid');
         });
     </script>
 {% endblock %}

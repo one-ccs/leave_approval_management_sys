@@ -69,77 +69,66 @@ function dialog_confirm(title, msg, confirm=function(){}, cancel=function(){}) {
         }
     });
 }
-function modal_form(options={}) {
-    let sHTML = ` <div class="modal fade" id="${options.modalID}" role="dialog"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div class="modal-title">${options.title}</div> <button class="btn-close" data-bs-dismiss="modal"></button> </div> <div class="modal-body">${sForm}</div> <div class="modal-footer"> <button class="btn btn-primary" onclick="${onSubmit.name}()">提交</button> <button class="btn btn-danger" data-bs-dismiss="modal" onclick="${onClose.name}()">关闭</button> </div> </div> </div> </div>`;
-}
-function bindDragSelectEvent(table, bootstrapTable, field) {
-    $(table).on('mousedown', function(e) {
-        this.selector = {
+function bindDragSelectEvent($table, uniqueid) {
+    $($table).on('mousedown', function(e) {
+        if($(e.target).closest('thead').length) return;
+        $table.selector = {
             mousedown: true,
+            drag: false,
             x: e.pageX,
             y: e.pageY,
+            startRow: [$(e.target).closest('tr').attr('data-uniqueid')],
         }
-        if(e.target.parentNode.parentNode.tagName === 'THEAD') {
-            this.selector.mousedown = false;
-            return;
-        }
-        if(e.ctrlKey && e.shiftKey) {
-            
-        }
-        else if(e.ctrlKey) {
-            // $(this).find('tbody > tr.selected').removeClass('selected');
-        }
-        else if(e.shiftKey) {
-            
-        }
-        else {
-            bootstrapTable().uncheckAll();
-        }
-        // $(e.target.parentNode).addClass('selected');
-        values = [];
-        $(this).find('tbody > tr').not('[data-drag-bind="true"]').each((index, element) => {
-            $(element).attr('data-drag-bind', 'true');
-            let offset = 5; // 设置误差防止隔行选择
+
+        $($table).find('tbody > tr').not('[data-dragbinded="true"]').each((index, element) => {
+            $(element).attr('data-dragbinded', 'true');
+            let offset = 3; // 设置判定误差, 防止隔行选择
+
             $(element).on('mouseenter', (e) => {
-                if(!this.selector.mousedown) return; 
-                let tr = e.currentTarget;
-                let originY = this.selector.y;
-                let offsetY = e.offsetY;
+                if(!$table.selector.drag) return;
+                let _uniqueid = $(e.currentTarget).attr('data-uniqueid');
+                let originY = $table.selector.y;
+                let checks = [];
                 if(e.pageY > originY) {
-                    if(offsetY >= 0) $(tr).addClass('selected');
+                    if(e.offsetY + offset >= 0) checks.push(_uniqueid);
                 }
                 else {
-                    if(e.offsetY > 0) $(tr).addClass('selected');
+                    if(e.offsetY + offset > 0) checks.push(_uniqueid);
                 }
-                bootstrapTable('checkBy', {field: field, values: values})
+                $table.bootstrapTable('checkBy', {field: uniqueid, values: checks});
             });
             $(element).on('mouseleave', (e) => {
-                if(!this.selector.mousedown) return; 
-                let tr = e.currentTarget;
-                let originY = this.selector.y;
-                let offsetY = e.offsetY;
-                let nowY = e.pageY;
-                if(nowY > originY) {
-                    if(offsetY < 0) $(tr).removeClass('selected');
+                if(!$table.selector.drag) return; 
+                let _uniqueid = $(e.currentTarget).attr('data-uniqueid');
+                let originY = $table.selector.y;
+                let unchecks = [];
+                if(e.pageY > originY) {
+                    if(e.offsetY < 0) unchecks.push(_uniqueid);
                 }
                 else {
-                    if(e.offsetY > 0) $(tr).removeClass('selected');
+                    if(e.offsetY > 0) unchecks.push(_uniqueid);
                 }
+                $table.bootstrapTable('uncheckBy', {field: uniqueid, values: unchecks});
             });
-        }),
-        $('#drag-box').css({
-            'z-index': 999,
-            'left': e.pageX + 'px',
-            'top': e.pageY + 'px',
-            'display': 'block',
         });
     }),
-    $(table).on('mousemove', function(e) {
-        if(!this.selector || !this.selector.mousedown) return;
+    $($table).on('mousemove', function(e) {
+        if(!$table.selector || !$table.selector.mousedown) return;
         e.preventDefault();
+        if(!$table.selector.drag) {
+            $table.selector.drag = true;
+            if(!e.ctrlKey) $table.bootstrapTable('uncheckAll');
+            $table.bootstrapTable('checkBy', {field: uniqueid, values: $table.selector.startRow});
+            $('#drag-box').css({
+                'z-index': 999,
+                'left': e.pageX + 'px',
+                'top': e.pageY + 'px',
+                'display': 'block',
+            });
+        }
         // 计算拖选框二维
-        let originX = this.selector.x;
-        let originY = this.selector.y;
+        let originX = $table.selector.x;
+        let originY = $table.selector.y;
         let nowY = e.pageY;
         let nowX = e.pageX;
         let _x = originX, _y = originY, _width = Math.abs(nowX - originX), _height = Math.abs(nowY - originY);
@@ -168,9 +157,10 @@ function bindDragSelectEvent(table, bootstrapTable, field) {
             'height': _height + 'px',
         });
     }),
-    $(table).on('mouseup', function(e) {
-        if(!this.selector) return;
-        this.selector.mousedown = false;
+    $($table).on('mouseup', function(e) {
+        if(!$table.selector || !$table.selector.mousedown) return;
+        $table.selector.mousedown = false;
+        $table.selector.drag = false;
         $('#drag-box').css({
             'z-index': -999,
             'left': 0,
@@ -180,9 +170,10 @@ function bindDragSelectEvent(table, bootstrapTable, field) {
             'display': 'none',
         });
     }),
-    $(table).on('mouseleave', function(e) {
-        if(!this.selector || !this.selector.mousedown) return;
-        this.selector.mousedown = false;
+    $($table).on('mouseleave', function(e) {
+        if(!$table.selector || !$table.selector.mousedown) return;
+        $table.selector.mousedown = false;
+        $table.selector.drag = false;
         $('#drag-box').css({
             'z-index': -999,
             'left': 0,
@@ -355,7 +346,7 @@ function btnAgreeClick(self) {
 function btnReportClick(self) {
 
 }
-function getActiveRowData(table) {
+function getActiveRowData($table) {
 
 }
 function btnAdminDeleteStudentClick() {
@@ -473,22 +464,33 @@ function btnAdminDeleteTeacherClick() {
     });
 }
 function btnModifyStudentClick(self) {
-    let dsid = $(self).attr('data-sid');
-    let row = null;
-    for(_row of studentTable.get(0).rows) {
-        if($(_row.cells.item(1)).text() === dsid) {
-            row = _row;
-            break;
-        }
-    }
+    let list = $('#studentTable').bootstrapTable('getSelections');
+    if(list.length === 0) return dialog_warning('未选择任何数据!');
+    document.forms.modifyStudentForm.reset(),
+    $(document.forms.modifyStudentForm['sid']).removeAttr('disabled'),
+    $(document.forms.modifyStudentForm['name']).removeAttr('disabled'),
+    $(document.forms.modifyStudentForm['gender']).removeAttr('disabled');
+    let row = list[0];
     if(row) {
-        document.forms.modifyStudentForm['sid'].value        = $(row.cells.item(1)).text();
-        document.forms.modifyStudentForm['name'].value       = $(row.cells.item(2)).text();
-        document.forms.modifyStudentForm['gender'].value     = $(row.cells.item(3)).text();
-        document.forms.modifyStudentForm['department'].value = $(row.cells.item(4)).text();
-        document.forms.modifyStudentForm['faculty'].value    = $(row.cells.item(5)).text();
-        document.forms.modifyStudentForm['major'].value      = $(row.cells.item(6)).text();
-        document.forms.modifyStudentForm['class'].value      = $(row.cells.item(7)).text();
+        if(list.length > 1) {
+            $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true'),
+            $(document.forms.modifyStudentForm['name']).attr('disabled', 'true'),
+            $(document.forms.modifyStudentForm['gender']).attr('disabled', 'true'),
+            document.forms.modifyStudentForm['sid'].value = '多个值',
+            document.forms.modifyStudentForm['name'].value = '多个值',
+            document.forms.modifyStudentForm['gender'].value = '多个值';
+        }
+        else {
+            $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true'),
+            document.forms.modifyStudentForm['sid'].value = row.sid;
+            document.forms.modifyStudentForm['name'].value = row.name;
+            document.forms.modifyStudentForm['gender'].value = row.gender;
+        }
+        document.forms.modifyStudentForm['department'].value = row.department;
+        document.forms.modifyStudentForm['faculty'].value    = row.faculty;
+        document.forms.modifyStudentForm['major'].value      = row.major;
+        document.forms.modifyStudentForm['grade'].value      = row.grade;
+        document.forms.modifyStudentForm['class'].value      = row.class;
     }
 }
 function btnModifyStudentSubmitClick(self) {

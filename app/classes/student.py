@@ -4,7 +4,7 @@ from app.classes import User
 
 
 class Student(User):
-    def __init__(self, name, password, sid, tid='', gender='', department='', faculty='', major='', _class=''):
+    def __init__(self, name, password, sid, tid='', gender='', department='', faculty='', major='', grade='', _class=''):
         super().__init__(name, password)
         self.__sid = sid
         self.tid= tid
@@ -12,6 +12,7 @@ class Student(User):
         self.department = department
         self.faculty = faculty
         self.major = major
+        self.grade = grade
         self._class  = _class
 
     @property
