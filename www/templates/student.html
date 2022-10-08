@@ -17,21 +17,23 @@
                 </ul>
             </div>
             <div data-itemcard-page="1" class="itemcard-page active">
-                <div class="row h-100 flex-nowrap align-items-center justify-content-center">
-                    <div class="col col-2 col-lg-2 col-sm-3">
-                        {% include 'includes/headcard.html' %}
+                <div class="container">
+                    <div class="row h-100 flex-nowrap align-items-center justify-content-center">
+                        <div class="col col-2 col-lg-2 col-sm-3">
+                            {% include 'includes/headcard.html' %}
+                        </div>
+                        <table class="col col-8 table table-striped table-bordered m-0" border="3" style="width: 66%;background-color: #fff;">
+                            <thead>
+                                <tr><th colspan="4">学生信息</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>学号</td><td>{{ rid }}</td><td>学部</td><td>{{ department }}</td></tr>
+                                <tr><td>姓名</td><td>{{ name }}</td><td>系别</td><td>{{ faculty }}</td></tr>
+                                <tr><td>性别</td><td>{{ gender }}</td><td>专业</td><td>{{ major }}</td></tr>
+                                <tr><td>-</td><td>-</td><td>班级</td><td>{{ _class }}</td></tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <table class="col col-8 table table-striped table-bordered m-0" border="3" style="width: 66%;background-color: #fff;">
-                        <thead>
-                            <tr><th colspan="4">学生信息</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>学号</td><td>{{ rid }}</td><td>学部</td><td>{{ department }}</td></tr>
-                            <tr><td>姓名</td><td>{{ name }}</td><td>系别</td><td>{{ faculty }}</td></tr>
-                            <tr><td>性别</td><td>{{ gender }}</td><td>专业</td><td>{{ major }}</td></tr>
-                            <tr><td>-</td><td>-</td><td>班级</td><td>{{ _class }}</td></tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
             <div data-itemcard-page="2" class="itemcard-page">
@@ -71,7 +73,7 @@
 
 {% block script %}
     <script>
-        let applyTable = null, revokeTable = null, doneTable = null;
+        let applyTable = revokeTable = doneTable = null;
         $('[data-itemcard-menu="2"]').on('click', () => {
             if(applyTable) return;
             applyTable = $('#applyTable').bootstrapTable({
@@ -171,6 +173,9 @@
                 totalField: 'length',
                 dataField: 'data',
                 idField: 'sid',
+            }),
+            bindDragSelectEvent({
+                $table: applyTable, 
             }),
             $('#btnRecall').on('click', function() {
                 let leave = $('#applyTable').bootstrapTable('getSelections').at(0);
@@ -340,6 +345,9 @@
                 dataField: 'data',
                 idField: 'sid',
             }),
+            bindDragSelectEvent({
+                $table: revokeTable, 
+            }),
             $('#btnRevoke').on('click', function() {
                 let leave = $('#revokeTable').bootstrapTable('getSelections').at(0);
                 if(!leave) return dialogWarning('未选择任何数据!');
@@ -470,6 +478,9 @@
                 totalField: 'length',
                 dataField: 'data',
                 idField: 'sid',
+            });
+            bindDragSelectEvent({
+                $table: doneTable, 
             });
         });
     </script>

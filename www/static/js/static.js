@@ -127,16 +127,26 @@ function createConfirmModal(kw={}) {
     $btnConfirm.on('click', e => confirmClick(e, $modal, $btnConfirm)),
     $(document.body).append($modal);
 }
-function bindDragSelectEvent($table, uniqueid) {
-    $($table).on('mousedown', function(e) {
+function bindDragSelectEvent(kw={}) {
+    let args = ['$table', 'uniqueId', 'uniqueIdType', 'onStart', 'onEnd'];
+    for(let k in kw) if(args.indexOf(k) < 0) throw new ReferenceError(`无法识别的关键字 "${k}".`);
+
+    let $table = kw.$table || $();
+    let uniqueId = kw.uniqueId || '';
+    let uniqueIdType = kw.uniqueIdType || 'string';
+    let onStart = kw.onStart || function(){};
+    let onEnd = kw.onEnd || function(){};
+
+    $($table).on('mousedown', e => {
         if($(e.target).closest('thead').length) return;
         $table.selector = {
             mousedown: true,
             drag: false,
             x: e.pageX,
             y: e.pageY,
-            startRow: [$(e.target).closest('tr').attr('data-uniqueid')],
+            startRow: [uniqueIdType === 'int'? parseInt($(e.target).closest('tr').attr('data-uniqueid')): $(e.target).closest('tr').attr('data-uniqueid')],
         }
+        if(!uniqueId) return;
 
         $($table).find('tbody > tr').not('[data-dragbinded="true"]').each((index, element) => {
             $(element).attr('data-dragbinded', 'true');
@@ -148,12 +158,12 @@ function bindDragSelectEvent($table, uniqueid) {
                 let originY = $table.selector.y;
                 let checks = [];
                 if(e.pageY > originY) {
-                    if(e.offsetY + offset >= 0) checks.push(_uniqueid);
+                    if(e.offsetY + offset >= 0) checks.push(uniqueIdType === 'int'? parseInt(_uniqueid): _uniqueid);
                 }
                 else {
-                    if(e.offsetY + offset > 0) checks.push(_uniqueid);
+                    if(e.offsetY + offset > 0) checks.push(uniqueIdType === 'int'? parseInt(_uniqueid): _uniqueid);
                 }
-                $table.bootstrapTable('checkBy', {field: uniqueid, values: checks});
+                $table.bootstrapTable('checkBy', {field: uniqueId, values: checks});
             });
             $(element).on('mouseleave', (e) => {
                 if(!$table.selector.drag) return;
@@ -161,28 +171,31 @@ function bindDragSelectEvent($table, uniqueid) {
                 let originY = $table.selector.y;
                 let unchecks = [];
                 if(e.pageY > originY) {
-                    if(e.offsetY < 0) unchecks.push(_uniqueid);
+                    if(e.offsetY < 0) unchecks.push(uniqueIdType === 'int'? parseInt(_uniqueid): _uniqueid);
                 }
                 else {
-                    if(e.offsetY > 0) unchecks.push(_uniqueid);
+                    if(e.offsetY > 0) unchecks.push(uniqueIdType === 'int'? parseInt(_uniqueid): _uniqueid);
                 }
-                $table.bootstrapTable('uncheckBy', {field: uniqueid, values: unchecks});
+                $table.bootstrapTable('uncheckBy', {field: uniqueId, values: unchecks});
             });
         });
     }),
-    $($table).on('mousemove', function(e) {
+    $($table).on('mousemove', e => {
         if(!$table.selector || !$table.selector.mousedown) return;
         e.preventDefault();
         if(!$table.selector.drag) {
             $table.selector.drag = true;
-            if(!e.ctrlKey) $table.bootstrapTable('uncheckAll');
-            $table.bootstrapTable('checkBy', {field: uniqueid, values: $table.selector.startRow});
+            $table.bootstrapTable('checkBy', {field: uniqueId, values: $table.selector.startRow});
             $('#drag-box').css({
                 'z-index': 999,
                 'left': e.pageX + 'px',
                 'top': e.pageY + 'px',
                 'display': 'block',
             });
+            if(!uniqueId) return;
+            
+            onStart(e, $table);
+            if(!e.ctrlKey) $table.bootstrapTable('uncheckAll');
         }
         // 计算拖选框二维
         let originX = $table.selector.x;
@@ -215,10 +228,11 @@ function bindDragSelectEvent($table, uniqueid) {
             'height': _height + 'px',
         });
     }),
-    $($table).on('mouseup', function(e) {
+    $($table).on('mouseup', e => {
         if(!$table.selector || !$table.selector.mousedown) return;
         $table.selector.mousedown = false;
         $table.selector.drag = false;
+        onEnd(e, $table);
         $('#drag-box').css({
             'z-index': -999,
             'left': 0,
@@ -228,10 +242,11 @@ function bindDragSelectEvent($table, uniqueid) {
             'display': 'none',
         });
     }),
-    $($table).on('mouseleave', function(e) {
+    $($table).on('mouseleave', e => {
         if(!$table.selector || !$table.selector.mousedown) return;
         $table.selector.mousedown = false;
         $table.selector.drag = false;
+        onEnd(e, $table);
         $('#drag-box').css({
             'z-index': -999,
             'left': 0,

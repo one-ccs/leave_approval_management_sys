@@ -17,7 +17,7 @@ def check_login():
 
 @admin_blue.route('/')
 def root():
-    rid =session.get('role')['rid']
+    rid = session.get('role')['rid']
     args = {'headimg': ''}
     result = db.execute('SELECT * FROM admin WHERE aid=?', (rid, ))
     if result and len(result) > 0:

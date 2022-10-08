@@ -24,20 +24,22 @@
                 </ul>
             </div>
             <div data-itemcard-page="1" class="itemcard-page active">
-                <div class="row h-100 flex-nowrap align-items-center justify-content-center">
-                    <div class="col col-2 col-lg-2 col-sm-3">
-                        {% include 'includes/headcard.html' %}
+                <div class="container">
+                    <div class="row h-100 flex-nowrap align-items-center justify-content-center">
+                        <div class="col col-2 col-lg-2 col-sm-3">
+                            {% include 'includes/headcard.html' %}
+                        </div>
+                        <table class="col col-8 table table-striped table-bordered m-0" border="3" style="width: 30%;background-color: #fff;">
+                            <thead>
+                                <tr><th colspan="2">管理员信息</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>ID</td><td>{{ rid }}</td></tr>
+                                <tr><td>姓名</td><td>{{ name }}</td></tr>
+                                <tr><td>性别</td><td>{{ gender }}</td></tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <table class="col col-8 table table-striped table-bordered m-0" border="3" style="width: 30%;background-color: #fff;">
-                        <thead>
-                            <tr><th colspan="2">管理员信息</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>ID</td><td>{{ rid }}</td></tr>
-                            <tr><td>姓名</td><td>{{ name }}</td></tr>
-                            <tr><td>性别</td><td>{{ gender }}</td></tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
             <div data-itemcard-page="2" class="itemcard-page">
@@ -154,7 +156,10 @@
                 idField: 'sid',
                 uniqueId: 'sid',
             });
-            bindDragSelectEvent(studentTable, 'sid'),
+            bindDragSelectEvent({
+                $table: studentTable,
+                uniqueId: 'sid'
+            }),
             createConfirmModal({
                 $button: $('#btnStudentModify'),
                 indirectButton: true,
@@ -246,7 +251,10 @@
                 idField: 'tid',
                 uniqueId: 'tid',
             });
-            bindDragSelectEvent(teacherTable, 'tid'),
+            bindDragSelectEvent({
+                $table: teacherTable,
+                uniqueId: 'tid'
+            }),
             createConfirmModal({
                 $button: $('#btnTeacherModify'),
                 indirectButton: true,
