@@ -1,10 +1,12 @@
-function dialogInfo(msg, callback=function(){}, dismiss=true) {
+function dialogInfo(msg, callback=function(){}, dismiss=true, autoClose=true) {
+    let ac = "ok|800";
+    if(!autoClose) ac = '';
     return $.confirm({
         title: "提示",
         content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "green",
-        autoClose: "ok|800",
+        autoClose: ac,
         backgroundDismiss: dismiss,
         buttons: {
             ok: {
@@ -15,13 +17,15 @@ function dialogInfo(msg, callback=function(){}, dismiss=true) {
         }
     });
 }
-function dialogWarning(msg, callback=function(){}, dismiss=true) {
+function dialogWarning(msg, callback=function(){}, dismiss=true, autoClose=true) {
+    let ac = "ok|1200";
+    if(!autoClose) ac = '';
     return $.confirm({
         title: "警告",
         content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "orange",
-        autoClose: "ok|1200",
+        autoClose: ac,
         backgroundDismiss: dismiss,
         buttons: {
             ok: {
@@ -32,13 +36,15 @@ function dialogWarning(msg, callback=function(){}, dismiss=true) {
         }
     });
 }
-function dialogError(msg, callback=function(){}, dismiss=false) {
+function dialogError(msg, callback=function(){}, dismiss=false, autoClose=true) {
+    let ac = "ok|2000";
+    if(!autoClose) ac = '';
     return $.confirm({
         title: "错误",
         content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "red",
-        autoClose: "ok|2000",
+        autoClose: ac,
         backgroundDismiss: dismiss,
         buttons: {
             ok: {
@@ -86,32 +92,33 @@ function createConfirmModal(kw={}) {
     $modal.attr('id', id),
     $modal.addClass('modal fade'),
     $modal.attr('role', 'dialog');
-    $modal.setTitle = function(title) {
-        $(this).find('.modal-title').html(title);
-    };
 
+    let $_btn = $(document.createElement('button'));
     if(indirectButton) {
-        let $_btn = $(document.createElement('button'));
+        $_btn.hide();
         $_btn.attr('data-bs-toggle', 'modal'),
         $_btn.attr('data-bs-target', `#${id}`),
         $button.on('click', e => buttonClick(e, $modal, $_btn)),
         $(document.body).append($_btn);
-        $modal.show = () => {
-            if(!$modal.hasClass('show')) {
-                $_btn.click();
-            }
-        };
-        $modal.hide = () => {
-            if($modal.hasClass('show')) {
-                $_btn.click();
-            }
-        };
     }
     else {
         $button.attr('data-bs-toggle', 'modal'),
         $button.attr('data-bs-target', `#${id}`),
         $button.on('click', e => buttonClick(e, $modal, $button));
     }
+    $modal.setTitle = function(title) {
+        $(this).find('.modal-title').html(title);
+    };
+    $modal.show = () => {
+        if(!$modal.hasClass('show')) {
+            indirectButton? $_btn.click(): $button.click();
+        }
+    };
+    $modal.hide = () => {
+        if($modal.hasClass('show')) {
+            indirectButton? $_btn.click(): $button.click();
+        }
+    };
 
     $modal.html(`<div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div class="modal-title">${title}</div> <button class="btn-close" data-bs-dismiss="modal"></button> </div> <div class="modal-body">${body}</div> <div class="modal-footer"> <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button> <button class="btn btn-primary">提交</button> </div> </div> </div>`);
     $btnCancel = $modal.find('div.modal-footer > button.btn.btn-secondary');
@@ -383,6 +390,21 @@ $(document).ready(function() {
                 $('#btnUserCenter').show();
                 break;
         }
+        let itv = setInterval(() => {
+            $.ajax({
+                type: 'get',
+                url: '/online',
+            }).done((data => {
+                if(data.state === 'fail') {
+                    itv && clearInterval(itv);
+                    dialogWarning('登录已过期, 请重新登录!', function() {
+                        window.location.href = '/session';
+                    }, dismiss=false, autoClose=false);
+                }
+            })).fail((function(jqXHR) {
+                dialogError(JSON.parse(jqXHR.responseText).msg);
+            }));
+        }, 1000 * 60 * 32);
     }
 });
 function btnBrowseClick(self) {

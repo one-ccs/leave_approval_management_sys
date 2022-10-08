@@ -65,14 +65,14 @@ def students():
         else:
             res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
     if request.method == 'POST':
-        sid = request.form.get('sid')
-        name = request.form.get('name')
-        gend = request.form.get('gender')
-        depa = request.form.get('department')
-        facu = request.form.get('faculty')
-        majo = request.form.get('major')
-        grad = request.form.get('grade')
-        clas = request.form.get('class')
+        sid = request.values.get('sid')
+        name = request.values.get('name')
+        gend = request.values.get('gender')
+        depa = request.values.get('department')
+        facu = request.values.get('faculty')
+        majo = request.values.get('major')
+        grad = request.values.get('grade')
+        clas = request.values.get('class')
         try:
             stu = Student(name, 'None', sid, gend, depa, facu, majo, grad, clas)
             stu.id = session.get(stu.sid)['id']
@@ -81,7 +81,7 @@ def students():
         result = db.execute()
         res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
     if request.method == 'DELETE':
-        sids = request.form.get('sids')
+        sids = request.values.get('sids')
         if not sids or len(sids) == 0:
             return make_response({'state': 'fail', 'msg': '未提供要删除的学号'}, 403)
         sids = sids.split(',')
@@ -122,7 +122,7 @@ def teachers():
     if request.method == 'POST':
         res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
     if request.method == 'DELETE':
-        tids = request.form.get('tids')
+        tids = request.values.get('tids')
         if not tids or len(tids) == 0:
             return make_response({'state': 'fail', 'msg': '未提供要删除的学号'}, 403)
         tids = tids.split(',')

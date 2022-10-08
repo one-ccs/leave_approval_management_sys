@@ -10,8 +10,10 @@
             <div class="itemcard-menu">
                 <ul class="pagination">
                     <li data-itemcard-menu="1" class="page-item active"><button class="page-link"><i class="fa fa-address-card me-2"></i>用户信息</button></li>
-                    <li data-itemcard-menu="2" class="page-item"><button class="page-link"><i class="fa fa-plus-square me-2"></i>请假</button></li>
-                    <li data-itemcard-menu="3" class="page-item disabled"><button class="page-link"><i class="fa fa-cogs me-2"></i>设置</button></li>
+                    <li data-itemcard-menu="2" class="page-item"><button class="page-link"><i class="fa fa fa-list-alt me-2"></i>请假</button></li>
+                    <li data-itemcard-menu="3" class="page-item"><button class="page-link"><i class="fa fa fa-list-alt me-2"></i>销假</button></li>
+                    <li data-itemcard-menu="4" class="page-item"><button class="page-link"><i class="fa fa fa-list-alt me-2"></i>已完成</button></li>
+                    <li data-itemcard-menu="5" class="page-item disabled"><button class="page-link"><i class="fa fa-cogs me-2"></i>设置</button></li>
                 </ul>
             </div>
             <div data-itemcard-page="1" class="itemcard-page active">
@@ -36,55 +38,32 @@
                 <div class="container">
                     <div class="row">
                         <div id="leaveToolbar" class="col button-group">
-                            <button class="btn btn-danger" id="btnRevoke">撤销申请<i class="fa fa-trash-o ms-2"></i></button>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLeaveModal">新建申请<i class="fa fa-plus-circle ms-2"></i></button>
+                            <button class="btn btn-danger" id="btnRecall">撤回申请<i class="fa fa-trash-o ms-2"></i></button>
+                            <button class="btn btn-primary" id="btnNewLeave">新建申请<i class="fa fa-plus-circle ms-2"></i></button>
                         </div>
-                        <table id="leaveTable" class="col"></table>
+                        <table id="applyTable" class="col"></table>
                     </div>
                 </div>
             </div>
             <div data-itemcard-page="3" class="itemcard-page">
-                设置
+                <div class="container">
+                    <div class="row">
+                        <div id="reportToolbar" class="col button-group">
+                            <button class="btn btn-primary" id="btnRevoke">申请销假<i class="fa fa-location-arrow ms-2"></i></button>
+                        </div>
+                        <table id="revokeTable" class="col"></table>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="modal fade" id="addLeaveModal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">新建请假申请</div>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
+            <div data-itemcard-page="4" class="itemcard-page">
+                <div class="container">
+                    <div class="row">
+                        <table id="doneTable" class="col"></table>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <form id="addForm" class="container rounded mx-auto">
-                        <div class="form-floating">
-                            <select class="form-select" id="inputCategory">
-                                <option value="事假">事假</option>
-                                <option value="公假">公假</option>
-                                <option value="病假">病假</option>
-                                <option value="出校申请">出校申请</option>
-                            </select>
-                            <label class="form-label float-start" for="inputCategory">类别</label>
-                        </div>
-                        <div class="form-floating mt-3">
-                            <input class="form-control" type="datetime-local" id="inputStartDatatime">
-                            <label class="form-label" for="inputStartDatatime">开始日期</label>
-                        </div>
-                        <div class="form-floating mt-3">
-                            <input class="form-control" type="datetime-local" id="inputEndDatetime">
-                            <label class="form-label" for="inputEndDatetime">结束日期</label>
-                        </div>
-                        <div class="form-floating mt-3">
-                            <textarea class="form-control h-25" id="inputReason"></textarea>
-                            <label class="form-label" for="inputReason">原因</label>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                    <button class="btn btn-primary" id="btnSubmit">提交</button>
-                </div>
+            </div>
+            <div data-itemcard-page="5" class="itemcard-page">
+                设置
             </div>
         </div>
     </div>
@@ -92,43 +71,40 @@
 
 {% block script %}
     <script>
-        let leaveTable = null;
+        let applyTable = null, revokeTable = null, doneTable = null;
         $('[data-itemcard-menu="2"]').on('click', () => {
-            if(leaveTable) return;
-            leaveTable = $('#leaveTable').bootstrapTable({
+            if(applyTable) return;
+            applyTable = $('#applyTable').bootstrapTable({
                 locale: 'zh-CN',
                 toolbar: '#leaveToolbar',
                 toolbarAlign: 'left',
-                buttonsOrder: ['paginationSwitch', 'refresh', 'toggle', 'fullscreen', 'columns'],
-                pagination: true,
-                search: true,
-                searchTimeOut: 300,
-                showColumns: true,
-                minimumCountColumns: 3,
-                clickToSelect: true,
-                multipleSelectRow: true,
+                buttonsOrder: ['paginationSwitch', 'toggle', 'fullscreen', 'refresh', 'columns'],
                 showPaginationSwitch: true,
                 showToggle: true,
                 showFullscreen: true,
+                showRefresh: true,
+                showColumns: true,
+                showButtonText: false,
+                showHeader: true,
+                showFooter: false,
+                pagination: true,
+                search: true,
+                searchTimeOut: 300,
+                minimumCountColumns: 3,
+                clickToSelect: true,
+                multipleSelectRow: true,
                 sortable: true,
+                sortName: 'apply_timestamp',
+                sortOrder: 'desc',
+                sortStable: false,
                 rowStyle: function(row, index) {
                     let classes = '', css = '';
                     switch(row.state) {
-                        case '已完成':
-                            classes = 'table-success';
-                            break;
-                        case '待销假':
+                        case '待审批':
                             classes = 'table-warning';
                             break;
-                        case '待审批':
                         case '审批中':
                             classes = 'table-info';
-                            break;
-                        case '已撤回':
-                            classes = 'table-light';
-                            break;
-                        case '已驳回':
-                            classes = 'table-danger';
                             break;
                     }
                     return {
@@ -137,6 +113,11 @@
                     }
                 },
                 url: '/student/leaves',
+                queryParamsType: 'limit',
+                queryParams: function(params) {
+                    params.search = 'apply';
+                    return params;
+                },
                 columns: [{
                     field: 'radio',
                     title: '单选',
@@ -190,61 +171,305 @@
                 totalField: 'length',
                 dataField: 'data',
                 idField: 'sid',
-            });
-        }),
-        $('#btnRevoke').on('click', function() {
-            let leave = $('#leaveTable').bootstrapTable('getSelections').at(0);
-            if(!leave) return dialog_warning('未选择任何数据！');
-            if(leave.state !== '审批中' && leave.state !== '待审批') return dialog_warning('无法撤回该请假条!');
-            dialog_confirm('撤销申请', "确定撤销申请吗?", () => {
-                let form = new FormData();
-                form.append('id', leave.id);
-                $.ajax({
-                    async: !1,
-                    crossDomain: !0,
-                    type: 'delete',
-                    url: '/student/leaves',
-                    headers: {
-                        "cache-control": "no-cache"
-                    },
-                    processData: !1,
-                    contentType: !1,
-                    mimeType: "multipart/form-data",
-                    data: form
-                }).done((function(data) {
-                    $('#leaveTable').bootstrapTable('refresh', {});
-                })).fail((function(jqXHR) {
-                    dialog_error(JSON.parse(jqXHR.responseText).msg);
-                }));
-            });
-        }),
-        $('#btnSubmit').on('click', function() {
-            let category = $('#inputCategory').val(), sd = $('#inputStartDatatime').val(), ed = $('#inputEndDatetime').val(), reason = $('#inputReason').val();
-            if(!category || !sd || !ed) {
-                return dialog_warning('类别、开始日期和结束日期不能为空！');
-            }
-            let form = new FormData();
-            form.append('category', category),
-            form.append('start_timestamp', sd),
-            form.append('end_timestamp', ed),
-            form.append('reason', reason);
-            $.ajax({
-                async: !1,
-                crossDomain: !0,
-                type: 'post',
-                url: '/student/leaves',
-                headers: {
-                    "cache-control": "no-cache"
+            }),
+            $('#btnRecall').on('click', function() {
+                let leave = $('#applyTable').bootstrapTable('getSelections').at(0);
+                if(!leave) return dialogWarning('未选择任何数据!');
+                if(leave.state !== '审批中' && leave.state !== '待审批') return dialogWarning('无法撤回该请假条!');
+                dialogConfirm('撤回申请', "确定撤回申请吗?", () => {
+                    let form = new FormData();
+                    form.append('id', leave.id);
+                    $.ajax({
+                        async: !1,
+                        crossDomain: !0,
+                        type: 'delete',
+                        url: '/student/leaves',
+                        headers: {
+                            "cache-control": "no-cache"
+                        },
+                        processData: !1,
+                        contentType: !1,
+                        mimeType: "multipart/form-data",
+                        data: form
+                    }).done((function(data) {
+                        $('#applyTable').bootstrapTable('refresh', {});
+                    })).fail((function(jqXHR) {
+                        dialogError(JSON.parse(jqXHR.responseText).msg);
+                    }));
+                });
+            }),
+            createConfirmModal({
+                $button: $('#btnNewLeave'),
+                id: 'addLeaveModal',
+                title: '新建请假申请',
+                body: '<form id="addForm" class="container rounded mx-auto"> <div class="form-floating"> <select class="form-select" id="inputCategory"> <option value="事假">事假</option> <option value="公假">公假</option> <option value="病假">病假</option> <option value="出校申请">出校申请</option> </select> <label class="form-label float-start" for="inputCategory">类别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="datetime-local" id="inputStartDatatime"> <label class="form-label" for="inputStartDatatime">开始日期</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="datetime-local" id="inputEndDatetime"> <label class="form-label" for="inputEndDatetime">结束日期</label> </div> <div class="form-floating mt-3"> <textarea class="form-control h-25" id="inputReason"></textarea> <label class="form-label" for="inputReason">原因</label> </div> </form>',
+                buttonClick: function() {
+
                 },
-                processData: !1,
-                contentType: !1,
-                mimeType: "multipart/form-data",
-                data: form
-            }).done(() => {
-                $(this).siblings().first().click(),
-                $('#leaveTable').bootstrapTable('refresh', {});
-            }).fail(function(data) {
-                dialog_error('操作失败，请联系管理员!');
+                confirmClick: function(e, $modal, $button) {
+                    let category = $('#inputCategory').val(), sd = $('#inputStartDatatime').val(), ed = $('#inputEndDatetime').val(), reason = $('#inputReason').val();
+                    if(!category || !sd || !ed) {
+                        return dialogWarning('类别、开始日期和结束日期不能为空!');
+                    }
+                    if(ed < sd) return dialogWarning('结束日期必须大于开始日期!');
+                    let form = new FormData();
+                    form.append('category', category),
+                    form.append('start_timestamp', sd),
+                    form.append('end_timestamp', ed),
+                    form.append('reason', reason);
+                    form.append('type', 'apply');
+                    $.ajax({
+                        async: !1,
+                        crossDomain: !0,
+                        type: 'post',
+                        url: '/student/leaves',
+                        headers: {
+                            "cache-control": "no-cache"
+                        },
+                        processData: !1,
+                        contentType: !1,
+                        mimeType: "multipart/form-data",
+                        data: form
+                    }).done(() => {
+                        $(this).siblings().first().click(),
+                        $('#applyTable').bootstrapTable('refresh', {}),
+                        $modal.hide();
+                    }).fail(function(jqXHR) {
+                        dialogError(JSON.parse(jqXHR.responseText).msg);
+                    });
+                },
+            });
+        }),
+        $('[data-itemcard-menu="3"]').on('click', () => {
+            if(revokeTable) return;
+            revokeTable = $('#revokeTable').bootstrapTable({
+                locale: 'zh-CN',
+                toolbar: '#reportToolbar',
+                toolbarAlign: 'left',
+                buttonsOrder: ['paginationSwitch', 'toggle', 'fullscreen', 'refresh', 'columns'],
+                showPaginationSwitch: true,
+                showToggle: true,
+                showFullscreen: true,
+                showRefresh: true,
+                showColumns: true,
+                showButtonText: false,
+                showHeader: true,
+                showFooter: false,
+                pagination: true,
+                search: true,
+                searchTimeOut: 300,
+                minimumCountColumns: 3,
+                clickToSelect: true,
+                multipleSelectRow: true,
+                sortable: true,
+                sortName: 'apply_timestamp',
+                sortOrder: 'desc',
+                sortStable: false,
+                rowStyle: function(row, index) {
+                    let classes = '', css = '';
+                    switch(row.state) {
+                        case '待销假':
+                            classes = 'table-warning';
+                            break;
+                        case '销假中':
+                            classes = 'table-info';
+                            break;
+                    }
+                    return {
+                        classes: classes,
+                        css: css,
+                    }
+                },
+                url: '/student/leaves',
+                queryParamsType: 'limit',
+                queryParams: function(params) {
+                    params.search = 'revoke';
+                    return params;
+                },
+                columns: [{
+                    field: 'radio',
+                    title: '单选',
+                    radio: true,
+                }, {
+                    field: 'id', 
+                    title: '编号', 
+                    sortable: true,
+                    align: 'center',
+                    width: 1,
+                }, {
+                    field: 'apply_timestamp', 
+                    title: '申请日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'category', 
+                    title: '类别', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'start_timestamp', 
+                    title: '开始日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'end_timestamp', 
+                    title: '结束日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'reason', 
+                    title: '原因', 
+                    sortable: true,
+                }, {
+                    field: 'a1', 
+                    title: '辅导员审批', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'a2', 
+                    title: '教务处审批', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'state', 
+                    title: '状态', 
+                    sortable: true,
+                    align: 'center', 
+                }],
+                totalField: 'length',
+                dataField: 'data',
+                idField: 'sid',
+            }),
+            $('#btnRevoke').on('click', function() {
+                let leave = $('#revokeTable').bootstrapTable('getSelections').at(0);
+                if(!leave) return dialogWarning('未选择任何数据!');
+                if(leave.state !== '待销假') return dialogWarning('该请假条无法销假!');
+                dialogConfirm('申请销假', "确定申请销假吗?", () => {
+                    let form = new FormData();
+                    form.append('id', leave.id);
+                    form.append('type', 'revoke');
+                    $.ajax({
+                        async: !1,
+                        crossDomain: !0,
+                        type: 'post',
+                        url: '/student/leaves',
+                        headers: {
+                            "cache-control": "no-cache"
+                        },
+                        processData: !1,
+                        contentType: !1,
+                        mimeType: "multipart/form-data",
+                        data: form
+                    }).done((function(data) {
+                        $('#revokeTable').bootstrapTable('refresh', {});
+                    })).fail((function(jqXHR) {
+                        dialogError(JSON.parse(jqXHR.responseText).msg);
+                    }));
+                });
+            });
+        }),
+        $('[data-itemcard-menu="4"]').on('click', () => {
+            if(doneTable) return;
+            doneTable = $('#doneTable').bootstrapTable({
+                locale: 'zh-CN',
+                buttonsOrder: ['paginationSwitch', 'toggle', 'fullscreen', 'refresh', 'columns'],
+                showPaginationSwitch: true,
+                showToggle: true,
+                showFullscreen: true,
+                showRefresh: true,
+                showColumns: true,
+                showButtonText: false,
+                showHeader: true,
+                showFooter: false,
+                pagination: true,
+                search: true,
+                searchTimeOut: 300,
+                minimumCountColumns: 3,
+                clickToSelect: true,
+                multipleSelectRow: true,
+                sortable: true,
+                sortName: 'apply_timestamp',
+                sortOrder: 'desc',
+                sortStable: false,
+                rowStyle: function(row, index) {
+                    let classes = '', css = '';
+                    switch(row.state) {
+                        case '已完成':
+                            classes = 'table-success';
+                            break;
+                        case '已撤回':
+                            classes = 'table-light';
+                            break;
+                        case '已驳回':
+                            classes = 'table-danger';
+                            break;
+                    }
+                    return {
+                        classes: classes,
+                        css: css,
+                    }
+                },
+                url: '/student/leaves',
+                queryParamsType: 'limit',
+                queryParams: function(params) {
+                    params.search = 'done';
+                    return params;
+                },
+                columns: [{
+                    field: 'id', 
+                    title: '编号', 
+                    sortable: true,
+                    align: 'center',
+                    width: 1,
+                }, {
+                    field: 'apply_timestamp', 
+                    title: '申请日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'category', 
+                    title: '类别', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'start_timestamp', 
+                    title: '开始日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'end_timestamp', 
+                    title: '结束日期', 
+                    sortable: true,
+                    align: 'center',
+                }, {
+                    field: 'reason', 
+                    title: '原因', 
+                    sortable: true,
+                }, {
+                    field: 'a1', 
+                    title: '辅导员审批', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'a2', 
+                    title: '教务处审批', 
+                    sortable: true,
+                    align: 'center', 
+                }, {
+                    field: 'r', 
+                    title: '销假人', 
+                    sortable: true,
+                    align: 'center', 
+                    visible: false,
+                }, {
+                    field: 'state', 
+                    title: '状态', 
+                    sortable: true,
+                    align: 'center', 
+                }],
+                totalField: 'length',
+                dataField: 'data',
+                idField: 'sid',
             });
         });
     </script>

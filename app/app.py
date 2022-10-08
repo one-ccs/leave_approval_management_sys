@@ -28,13 +28,19 @@ def _session():
     args = session.get('role', {})
     return render_template('/session.html', **args)
 
+@app.route('/online')
+def online():
+    # 获取在线状态
+    if 'role' in session:
+        return make_response({'state': 'ok', 'msg': '已登录'}, 200)
+    return make_response({'state': 'fail', 'msg': '未登录'}, 200)
+
 @app.route('/login', methods=['GET', 'POST', 'DELETE'])
 def login():
     res = None
-    if request.method == 'GET':
+    if request.method == 'GET': # 获取登录页
         return render_template('/login.html')
-    # 登录
-    if request.method == 'POST':
+    if request.method == 'POST': # 登录
         result, role, rid, password = None, None, request.form.get('rid'), request.form.get('password')
         try:
             _role = db.execute('SELECT * FROM role WHERE rid=?', (rid, ))
@@ -62,11 +68,12 @@ def login():
                     'password': result['password'],
                     'role': result['role']
                 }
+                # 设置 permanent 为 true 浏览器可以看到过期时间, 并且每次请求会重置过期时间
+                session.permanent = True
                 res = make_response({'state': 'ok', 'msg': '登录成功'}, 200)
         else:
             res = make_response({'state': 'fail', 'msg': '用户信息查询失败, 请联系管理员'}, 500)
-    # 登出
-    if request.method == 'DELETE':
+    if request.method == 'DELETE': # 登出
         if 'role' not in session:
             res = make_response({'state': 'fail', 'msg': '请登录后操作'}, 403)
         else:
