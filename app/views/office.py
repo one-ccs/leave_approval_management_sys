@@ -12,7 +12,7 @@ def check_login():
     rid = request.cookies.get('rid')
     if not rid or rid not in session:
         return make_response({'state': 'fail', 'msg': '请登录后操作'}, 401)
-    if session.get(rid)['role'] != '教务处':
+    if session.get('role').get('role') != '教务处':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
 
 
@@ -20,7 +20,7 @@ def check_login():
 def root():
     rid = request.cookies.get('rid')
     args = {
-        'rid': session[rid]['rid'],
-        'name': session[rid]['name'],
+            'rid': session.get('role').get('rid'),
+            'name': session.get('role').get('name'),
     }
     return render_template('/office.html', **args)

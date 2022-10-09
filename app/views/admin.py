@@ -12,12 +12,12 @@ db = Database('./db/data.db')
 def check_login():
     if 'role' not in session:
         return redirect('/session')
-    if session.get('role')['role'] != '管理员':
+    if session.get('role').get('role') != '管理员':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
 
 @admin_blue.route('/')
 def root():
-    rid = session.get('role')['rid']
+    rid = session.get('role').get('rid')
     args = {'headimg': ''}
     result = db.execute('SELECT * FROM admin WHERE aid=?', (rid, ))
     if result and len(result) > 0:
@@ -29,8 +29,8 @@ def root():
         }
     else:
         args = {
-            'rid': session['role']['rid'],
-            'name': session['role']['name'],
+            'rid': session.get('role').get('rid'),
+            'name': session.get('role').get('name'),
         }
     headimg_path = url_for('static', filename=f'img/user_head/{args["rid"]}.webp')
     if path.isfile('www' + headimg_path):
@@ -75,7 +75,7 @@ def students():
         clas = request.values.get('class')
         try:
             stu = Student(name, 'None', sid, gend, depa, facu, majo, grad, clas)
-            stu.id = session.get(stu.sid)['id']
+            stu.id = session.get('role').get('id')
         except ValueError:
             return make_response({'state': 'fail', 'msg': '学号和姓名不能为空'}, 403)
         result = db.execute()

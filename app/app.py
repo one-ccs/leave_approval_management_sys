@@ -113,7 +113,7 @@ def regist():
 def user():
     if 'role' not in session:
         return redirect('/session')
-    res, role = None, session.get('role')['role']
+    res, role = None, session.get('role').get('role')
     if role == '学生':
         res = redirect('/student/')
     elif role == '辅导员':

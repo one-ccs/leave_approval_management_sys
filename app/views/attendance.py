@@ -11,7 +11,7 @@ def check_login():
     rid = request.cookies.get('rid')
     if not rid or rid not in session:
         return make_response({'state': 'fail', 'msg': '请登录后操作'}, 401)
-    if session.get(rid)['role'] != '考勤':
+    if session.get('role').get('role') != '考勤':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
 
 @attendance_blue.route('/')
@@ -29,7 +29,7 @@ def root():
         }
     else:
         args = {
-            'sid': session[rid]['rid'],
-            'name': session[rid]['name'],
+            'rid': session.get('role').get('rid'),
+            'name': session.get('role').get('name'),
         }
     return render_template('/attendance.html', **args)

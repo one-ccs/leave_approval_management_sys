@@ -4,6 +4,7 @@ from flask import request, session, make_response, render_template, url_for, red
 from os import path
 from app.views import assistant_blue
 from app.classes import Database
+from app.classes import Datetime
 
 db = Database('./db/data.db')
 
@@ -12,12 +13,12 @@ db = Database('./db/data.db')
 def check_login():
     if 'role' not in session:
         return redirect('/session')
-    if session.get('role')['role'] != '辅导员':
+    if session.get('role').get('role') != '辅导员':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
 
 @assistant_blue.route('/')
 def root():
-    rid = session.get('role')['rid']
+    rid = session.get('role').get('rid')
     args = {'headimg': ''}
     result = db.execute('SELECT * FROM teacher WHERE tid=?', (rid, ))
     if result and len(result) > 0:
@@ -30,8 +31,8 @@ def root():
         }
     else:
         args = {
-            'rid': session[rid]['rid'],
-            'name': session[rid]['name'],
+            'rid': session.get('role').get('rid'),
+            'name': session.get('role').get('name'),
         }
     headimg_path = url_for('static', filename=f'img/user_head/{args["rid"]}.webp')
     if path.isfile('www' + headimg_path):
@@ -41,8 +42,8 @@ def root():
 @assistant_blue.route('/leaves', methods=['GET', 'POST', 'DELETE'])
 def leaves():
     res = None
-    tid = session.get('role')['rid']
-    if request.method == 'GET':
+    tid = session.get('role').get('rid')
+    if request.method == 'GET': # 返回待审批及总览
         search = request.values.get('search')
         if search == 'approval':
             result = db.execute(
@@ -78,29 +79,69 @@ def leaves():
             res = make_response(dict, 200)
         else:
             res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
-    if request.method == 'POST':
-        category = request.form.get('category')
-        start_timestamp = request.form.get('start_timestamp')
-        end_timestamp = request.form.get('end_timestamp')
-        reason = request.form.get('reason')
-        if not category or not start_timestamp or not end_timestamp:
-            return make_response({'state': 'fial', 'msg': '申请失败, 类别、开始日期和结束日期不能为空'}, 403)
-        start_timestamp = start_timestamp.replace('T', ' ') + ':00'
-        end_timestamp = end_timestamp.replace('T', ' ') + ':00'
-        result = db.execute(
-            'INSERT INTO leave(sid,state,category,start_timestamp,end_timestamp,reason) VALUES(?,?,?,?,?,?)',
-            (tid, '待审批', category, start_timestamp, end_timestamp, reason)
-        )
-        if result and result > 0:
-            res = make_response({'state': 'ok', 'msg': '申请成功'}, 200)
-        else:
-            res = make_response({'state': 'fail', 'msg': '申请失败'}, 403)
-    if request.method == 'DELETE':
+    if request.method == 'POST': # 同意或驳回申请
+        ids = request.values.get('ids')
+        if not ids:
+            return make_response({'state': 'fail', 'msg': '未提供要删除的学号'}, 403)
+        ids = ids.split(',')
+        type = request.values.get('type')
+        if type == 'agree': # 同意
+            result, values = None, []
+            for id in ids:
+                # 查询请假条状态, 过滤无效请假条, 计算请假时长
+                result = db.execute('SELECT state,start_timestamp,end_timestamp FROM leave WHERE id=?', (id, ))
+                if not len(result):
+                    continue
+                if result[0]['state'] not in ('待审批', '销假中'):
+                    continue
+                # 请假天数, 向上取整, 时长不足 24 小时但跨天则算 2 天
+                diff_day = int(0.5 + Datetime.diff(result[0]['end_timestamp'], result[0]['start_timestamp']).total_seconds() / 3600 / 24)
+                start_day = Datetime.day(result[0]['start_timestamp'])
+                end_day = Datetime.day(result[0]['end_timestamp'])
+                if diff_day == 1 and start_day != end_day:
+                    diff_day = 2
+                # 大于等于 3 天，修改状态为“审批中”; 小于三天，修改状态为“待销假”
+                if result[0]['state'] == '销假中':
+                    values.append(('已完成', tid, id))
+                else:
+                    values.append(('审批中' if diff_day >= 3 else '待销假', tid, id))
+            if not len(values):
+                return make_response({'state': 'fail', 'msg': '未提供有效的请假条信息'}, 403)
+            revokes = [value for value in values if value[0] == '已完成']
+            approvals = [value for value in values if value[0] in ('审批中', '待销假')]
+            result1 = result2 = 0
+            if len(revokes):
+                result1 = db.executemany('UPDATE leave SET state=?,revoke_id=?,r_timestamp=CURRENT_TIMESTAMP WHERE id=?', tuple(revokes))
+            if len(approvals):
+                result2 = db.executemany('UPDATE leave SET state=?,approver1_id=?,a1_timestamp=CURRENT_TIMESTAMP WHERE id=?', tuple(approvals))
+            if result1 or result2:
+                res = make_response({'state': 'ok', 'msg': f'操作成功, 成功修改 {result1 + result2} 条数据'}, 200)
+            else:
+                res = make_response({'state': 'fail', 'msg': '操作失败'}, 403)
+        elif type == 'refuse': # 驳回
+            result, refuses = None, []
+            for id in ids:
+                # 查询请假条状态, 过滤无效请假条
+                result = db.execute('SELECT state,start_timestamp,end_timestamp FROM leave WHERE id=?', (id, ))
+                if not len(result):
+                    continue
+                if result[0]['state'] != '待审批':
+                    continue
+                refuses.append(('已驳回', tid, id))
+            if not len(refuses):
+                return make_response({'state': 'fail', 'msg': '未提供有效的请假条信息'}, 403)
+            if len(refuses):
+                result = db.executemany('UPDATE leave SET state=?,approver1_id=?,a1_timestamp=CURRENT_TIMESTAMP WHERE id=?', tuple(refuses))
+            if result:
+                res = make_response({'state': 'ok', 'msg': f'操作成功, 成功修改 {result} 条数据'}, 200)
+            else:
+                res = make_response({'state': 'fail', 'msg': '操作失败'}, 403)
+    if request.method == 'DELETE': # 销假
         id = request.form.get('id')
         if not id:
             return make_response({'state': 'fail', 'msg': '操作失败'}, 403)
         result = db.execute('DELETE FROM leave WHERE id=?', (id, ))
-        if result and result > 0:
+        if result:
             res = make_response({'state': 'ok', 'msg': '撤销成功'}, 200)
         else:
             res = make_response({'state': 'fail', 'msg': '撤销失败'}, 403)

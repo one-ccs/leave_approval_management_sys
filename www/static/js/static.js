@@ -61,6 +61,8 @@ function dialogConfirm(title, msg, confirm=function(){}, cancel=function(){}) {
         content: '<span class="fileitemTr">' + msg + "</span>",
         theme: "bootstrap",
         type: "red",
+        autoClose: '',
+        backgroundDismiss: false,
         buttons: {
             confirm: {
                 text: "确认",
@@ -193,9 +195,10 @@ function bindDragSelectEvent(kw={}) {
                 'display': 'block',
             });
             if(!uniqueId) return;
-            
+
             onStart(e, $table);
             if(!e.ctrlKey) $table.bootstrapTable('uncheckAll');
+            $table.bootstrapTable('checkBy', {field: uniqueId, values: $table.selector.startRow});
         }
         // 计算拖选框二维
         let originX = $table.selector.x;
@@ -412,7 +415,7 @@ $(document).ready(function() {
             }).done((data => {
                 if(data.state === 'fail') {
                     itv && clearInterval(itv);
-                    dialogWarning('登录已过期, 请重新登录!', function() {
+                    dialogConfirm('会话已过期', '登录已过期, 请重新登录!', function() {
                         window.location.href = '/session';
                     }, dismiss=false, autoClose=false);
                 }
@@ -422,258 +425,3 @@ $(document).ready(function() {
         }, 1000 * 60 * 32);
     }
 });
-function btnBrowseClick(self) {
-
-}
-function btnRejectClick(self) {
-
-}
-function btnAgreeClick(self) {
-
-}
-function btnReportClick(self) {
-
-}
-function getActiveRowData($table) {
-
-}
-function btnAdminDeleteStudentClick() {
-    let list = $('#studentTable').bootstrapTable('getSelections');
-    if(list.length === 0) return dialogWarning('未选择任何数据!');
-    let arr1 = [];
-    for(row of list) {
-        arr1.push('<div class="col">' + row.sid + ' ' + row.name + "</div>");
-    }
-    let arr2 = [];
-    if(arr1.length % 2 === 0) {
-        for(i in arr1) {
-            if(i % 2 !== 0) {
-                arr2.push('<div class="row">' + arr1[i-1] + arr1[i] + '</div>')
-            }
-        }
-    }
-    else {
-        if(arr1.length === 1) {
-            arr2.push('<div class="row">' + arr1[0] + '</div>')
-        }
-        else {
-            arr2.push('<div class="row">' + arr1[0])
-            for(i in arr1) {
-                if(i > 0 && i % 2 === 0 && i !== arr1.length - 1) {
-                    arr2.push(arr1[i-1] + '</div><div class="row">' + arr1[i]);
-                }
-                if(i === arr1.length - 1) {
-                    arr2[arr2.length - 1] = arr2[arr2.length - 1] + arr1[arr1.length - 1] + '</div>';
-                }
-            }
-        }
-    }
-    let html = '<div class="container">' + arr2.join('') + '</div>';
-    dialogConfirm('警告', `<div class="my-1 text-center text-danger">确定要删除 ${list.length} 条数据吗, 该操作无法撤销!</div><br>` + html, () => {
-        let sids = [];
-        for(row of list) sids.push(row.sid);
-        let form = new FormData();
-        form.append('sids', sids);let settings = {
-            async: !1,
-            crossDomain: !0,
-            url: "/admin/students",
-            method: "delete",
-            headers: {
-                "cache-control": "no-cache"
-            },
-            processData: !1,
-            contentType: !1,
-            mimeType: "multipart/form-data",
-            data: form
-        };
-        $.ajax(settings).done((function(data) {
-            $('#studentTable').bootstrapTable('refresh', {});
-        })).fail((function(jqXHR) {
-            let msg = JSON.parse(jqXHR.responseText).msg;
-            dialogWarning(msg);
-        }));
-    });
-}
-function btnAdminDeleteTeacherClick() {
-    let list = $('#teacherTable').bootstrapTable('getSelections');
-    if(list.length === 0) return dialogWarning('未选择任何数据!');
-    let arr1 = [];
-    for(row of list) {
-        arr1.push('<div class="col">' + row.tid + ' ' + row.name + "</div>");
-    }
-    let arr2 = [];
-    if(arr1.length % 2 === 0) {
-        for(i in arr1) {
-            if(i % 2 !== 0) {
-                arr2.push('<div class="row">' + arr1[i-1] + arr1[i] + '</div>')
-            }
-        }
-    }
-    else {
-        if(arr1.length === 1) {
-            arr2.push('<div class="row">' + arr1[0] + '</div>')
-        }
-        else {
-            arr2.push('<div class="row">' + arr1[0])
-            for(i in arr1) {
-                if(i > 0 && i % 2 === 0 && i !== arr1.length - 1) {
-                    arr2.push(arr1[i-1] + '</div><div class="row">' + arr1[i]);
-                }
-                if(i === arr1.length - 1) {
-                    arr2[arr2.length - 1] = arr2[arr2.length - 1] + arr1[arr1.length - 1] + '</div>';
-                }
-            }
-        }
-    }
-    let html = '<div class="container">' + arr2.join('') + '</div>';
-    dialogConfirm('警告', `<div class="my-1 text-center text-danger">确定要删除 ${list.length} 条数据吗, 该操作无法撤销!</div><br>` + html, () => {
-        let tids = [];
-        for(row of list) tids.push(row.tid);
-        let form = new FormData();
-        form.append('tids', tids);let settings = {
-            async: !1,
-            crossDomain: !0,
-            url: "/admin/teachers",
-            method: "delete",
-            headers: {
-                "cache-control": "no-cache"
-            },
-            processData: !1,
-            contentType: !1,
-            mimeType: "multipart/form-data",
-            data: form
-        };
-        $.ajax(settings).done((function(data) {
-            $('#teacherTable').bootstrapTable('refresh', {});
-        })).fail((function(jqXHR) {
-            let msg = JSON.parse(jqXHR.responseText).msg;
-            dialogWarning(msg);
-        }));
-    });
-}
-function btnModifyStudentClick(e, $modal, $button) {
-    let list = $('#studentTable').bootstrapTable('getSelections');
-    if(list.length === 0) return dialogWarning('未选择任何数据!');
-    $modal.show();
-    if(list.length > 1) $modal.setTitle(`批量修改学生数据 (共 ${list.length} 个)`);
-    $(document.forms.modifyStudentForm['sid']).removeAttr('disabled'),
-    $(document.forms.modifyStudentForm['name']).removeAttr('disabled'),
-    $(document.forms.modifyStudentForm['gender']).removeAttr('disabled');
-    let row = list[0];
-    if(row) {
-        if(list.length > 1) {
-            $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true'),
-            $(document.forms.modifyStudentForm['name']).attr('disabled', 'true'),
-            $(document.forms.modifyStudentForm['gender']).attr('disabled', 'true'),
-            document.forms.modifyStudentForm['sid'].value    = '多个值',
-            document.forms.modifyStudentForm['name'].value   = '多个值',
-            document.forms.modifyStudentForm['gender'].value = '多个值';
-        }
-        else {
-            $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true'),
-            document.forms.modifyStudentForm['sid'].value    = row.sid;
-            document.forms.modifyStudentForm['name'].value   = row.name;
-            document.forms.modifyStudentForm['gender'].value = row.gender;
-        }
-        document.forms.modifyStudentForm['department'].value = row.department;
-        document.forms.modifyStudentForm['faculty'].value    = row.faculty;
-        document.forms.modifyStudentForm['major'].value      = row.major;
-        document.forms.modifyStudentForm['grade'].value      = row.grade;
-        document.forms.modifyStudentForm['class'].value      = row.class;
-    }
-}
-function btnModifyStudentSubmitClick(self) {
-    let sid = document.forms.modifyStudentForm['sid'].value;
-    let name = document.forms.modifyStudentForm['name'].value;
-    let gend = document.forms.modifyStudentForm['gender'].value;
-    let depa = document.forms.modifyStudentForm['department'].value;
-    let facu = document.forms.modifyStudentForm['faculty'].value;
-    let majo = document.forms.modifyStudentForm['major'].value;
-    let clas = document.forms.modifyStudentForm['class'].value;
-
-    let form = new FormData();
-    form.append('sid', sid);
-    form.append('name', name);
-    form.append('gender', gend);
-    form.append('department', depa);
-    form.append('faculty', facu);
-    form.append('major', majo);
-    form.append('class', clas);
-    $.ajax({
-        async: !1,
-        crossDomain: !0,
-        url: "/admin/students",
-        method: "POST",
-        headers: {
-            "cache-control": "no-cache"
-        },
-        processData: !1,
-        contentType: !1,
-        mimeType: "multipart/form-data",
-        data: form
-    }).done((function(data) {
-        dialogInfo('修改成功, 请刷新页面查看');
-    })).fail((function(jqXHR) {
-        dialogError(JSON.parse(jqXHR.responseText).msg);
-    }));
-}
-function btnModifyTeacherClick(e, $modal, $button) {
-    let list = $('#teacherTable').bootstrapTable('getSelections');
-    if(list.length === 0) return dialogWarning('未选择任何数据!');
-    $modal.show();
-    if(list.length > 1) $modal.setTitle(`批量修改教师数据 (共 ${list.length} 个)`);
-    $(document.forms.modifyTeacherForm['tid']).removeAttr('disabled'),
-    $(document.forms.modifyTeacherForm['name']).removeAttr('disabled'),
-    $(document.forms.modifyTeacherForm['gender']).removeAttr('disabled');
-    $(document.forms.modifyTeacherForm['telphone']).removeAttr('disabled');
-    let row = list[0];
-    if(row) {
-        if(list.length > 1) {
-            $(document.forms.modifyTeacherForm['tid']).attr('disabled', 'true'),
-            $(document.forms.modifyTeacherForm['name']).attr('disabled', 'true'),
-            $(document.forms.modifyTeacherForm['gender']).attr('disabled', 'true'),
-            $(document.forms.modifyTeacherForm['telphone']).attr('disabled', 'true'),
-            document.forms.modifyTeacherForm['tid'].value      = '多个值',
-            document.forms.modifyTeacherForm['name'].value     = '多个值',
-            document.forms.modifyTeacherForm['gender'].value   = '多个值';
-            document.forms.modifyTeacherForm['telphone'].value = '多个值';
-        }
-        else {
-            $(document.forms.modifyTeacherForm['tid']).attr('disabled', 'true'),
-            document.forms.modifyTeacherForm['tid'].value      = row.tid;
-            document.forms.modifyTeacherForm['name'].value     = row.name;
-            document.forms.modifyTeacherForm['gender'].value   = row.gender;
-            document.forms.modifyTeacherForm['telphone'].value = row.telphone;
-        }
-        document.forms.modifyTeacherForm['role'].value = row.role;
-    }
-}
-function btnModifyTeacherSubmitClick(self) {
-    let ancestry = self.parentNode.parentNode;
-    if(!ancestry) {
-        return dialogError('操作失败, 请联系管理员!');
-    }
-    let tid = $(ancestry).children().first().text();
-    if(!tid) {
-        return dialogError('操作失败, 请联系管理员!');
-    }
-    let form = new FormData();
-    form.append('id', tid);
-    $.ajax({
-        async: !1,
-        crossDomain: !0,
-        url: "/admin/teachers",
-        method: "POST",
-        headers: {
-            "cache-control": "no-cache"
-        },
-        processData: !1,
-        contentType: !1,
-        mimeType: "multipart/form-data",
-        data: form
-    }).done((function(data) {
-        dialogInfo('修改成功, 请刷新页面查看');
-    })).fail((function(jqXHR) {
-        dialogError(JSON.parse(jqXHR.responseText).msg);
-    }));
-}

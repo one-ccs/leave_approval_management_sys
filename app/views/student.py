@@ -12,12 +12,12 @@ db = Database('./db/data.db')
 def check_login():
     if 'role' not in session:
         return redirect('/session')
-    if session.get('role')['role'] != '学生':
+    if session.get('role').get('role') != '学生':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
 
 @student_blue.route('/')
 def root():
-    rid = session.get('role')['rid']
+    rid = session.get('role').get('rid')
     args = {'headimg': ''}
     result = db.execute('SELECT * FROM student WHERE sid=?', (rid, ))
     if result and len(result) > 0:
@@ -33,8 +33,8 @@ def root():
         }
     else:
         args = {
-            'rid': session.get('role')['rid'],
-            'name': session.get('role')['name'],
+            'rid': session.get('role').get('rid'),
+            'name': session.get('role').get('name'),
         }
     headimg_path = url_for('static', filename=f'img/user_head/{args["rid"]}.webp')
     if path.isfile('www' + headimg_path):
@@ -44,7 +44,7 @@ def root():
 @student_blue.route('/leaves', methods=['GET', 'POST', 'DELETE'])
 def leaves():
     res = None
-    sid = session.get('role')['rid']
+    sid = session.get('role').get('rid')
     if request.method == 'GET': # 查询
         result = None
         search = request.values.get('search')
