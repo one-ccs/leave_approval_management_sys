@@ -19,7 +19,7 @@ def root():
     rid = request.cookies.get('rid')
     args = {}
     result = db.execute('SELECT * FROM teacher WHERE tid=?', (rid, ))
-    if result and len(result) > 0:
+    if len(result):
         result = result[0]
         args = {
             'tid': result['tid'],

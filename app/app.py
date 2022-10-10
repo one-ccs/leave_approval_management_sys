@@ -41,7 +41,7 @@ def login():
     if request.method == 'GET': # 获取登录页
         return render_template('/login.html')
     if request.method == 'POST': # 登录
-        result, role, rid, password = None, None, request.form.get('rid'), request.form.get('password')
+        result, role, rid, password = [], None, request.form.get('rid'), request.form.get('password')
         try:
             _role = db.execute('SELECT * FROM role WHERE rid=?', (rid, ))
             role = Role('None', password, rid, _role[0]['role'])
@@ -57,7 +57,7 @@ def login():
             result = db.execute('SELECT rid,password,role,name FROM role,student WHERE rid=? and rid=sid', (role.rid, ))
         else:
             res = make_response({'state': 'fail', 'msg': '不存在此用户'}, 403)
-        if result and len(result) > 0:
+        if len(result):
             result = result[0]
             if not role.check_password(result['password']):
                 res =  make_response({'state': 'fail', 'msg': '密码错误'}, 403)

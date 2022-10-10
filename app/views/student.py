@@ -20,7 +20,7 @@ def root():
     rid = session.get('role').get('rid')
     args = {'headimg': ''}
     result = db.execute('SELECT * FROM student WHERE sid=?', (rid, ))
-    if result and len(result) > 0:
+    if len(result):
         result = result[0]
         args = {
             'rid': result['sid'],
@@ -69,20 +69,19 @@ def leaves():
             'length': len(result),
             'data': []
         }
-        if result and len(result) > 0:
-            for row in result:
-                dict['data'].append({
-                    'id': row['id'],
-                    'apply_timestamp': row['apply_timestamp'],
-                    'category': row['category'],
-                    'start_timestamp': row['start_timestamp'],
-                    'end_timestamp': row['end_timestamp'],
-                    'reason': row['reason'],
-                    'a1': row['a1'],
-                    'a2': row['a2'],
-                    'r': row['r'],
-                    'state': row['state'],
-                })
+        for row in result:
+            dict['data'].append({
+                'id': row['id'],
+                'apply_timestamp': row['apply_timestamp'],
+                'category': row['category'],
+                'start_timestamp': row['start_timestamp'],
+                'end_timestamp': row['end_timestamp'],
+                'reason': row['reason'],
+                'a1': row['a1'],
+                'a2': row['a2'],
+                'r': row['r'],
+                'state': row['state'],
+            })
         res = make_response(dict, 200)
     if request.method == 'POST': # 新建申请、申请销假
         type = request.values.get('type')

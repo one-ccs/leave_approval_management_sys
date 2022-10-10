@@ -20,7 +20,7 @@ def root():
     rid = session.get('role').get('rid')
     args = {'headimg': ''}
     result = db.execute('SELECT * FROM admin WHERE aid=?', (rid, ))
-    if result and len(result) > 0:
+    if len(result):
         result = result[0]
         args = {
             'rid': result['aid'],
@@ -48,19 +48,18 @@ def students():
             'length': len(result),
             'data': []
         }
-        if result and len(result) > 0:
-            for row in result:
-                dict['data'].append({
-                    'on': row['on'],
-                    'sid': row['sid'],
-                    'name': row['name'],
-                    'gender': row['gender'],
-                    'department': row['department'],
-                    'faculty': row['faculty'],
-                    'major': row['major'],
-                    'grade': row['grade'],
-                    'class': row['class'],
-                })
+        for row in result:
+            dict['data'].append({
+                'on': row['on'],
+                'sid': row['sid'],
+                'name': row['name'],
+                'gender': row['gender'],
+                'department': row['department'],
+                'faculty': row['faculty'],
+                'major': row['major'],
+                'grade': row['grade'],
+                'class': row['class'],
+            })
         res = make_response(dict, 200)
     if request.method == 'POST':
         sid = request.values.get('sid')
@@ -104,16 +103,15 @@ def teachers():
             'length': len(result),
             'data': []
         }
-        if result and len(result) > 0:
-            for row in result:
-                dict['data'].append({
-                    'on': row['on'],
-                    'tid': row['tid'],
-                    'name': row['name'],
-                    'gender': row['gender'],
-                    'telphone': row['telphone'],
-                    'role': row['role'],
-                })
+        for row in result:
+            dict['data'].append({
+                'on': row['on'],
+                'tid': row['tid'],
+                'name': row['name'],
+                'gender': row['gender'],
+                'telphone': row['telphone'],
+                'role': row['role'],
+            })
         res = make_response(dict, 200)
     if request.method == 'POST':
         res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
