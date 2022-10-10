@@ -75,7 +75,7 @@
     <script>
         let applyTable = revokeTable = doneTable = null;
         $('[data-itemcard-menu="2"]').on('click', () => {
-            if(applyTable) return;
+            if(applyTable) return $('#applyTable').bootstrapTable('refresh', {});
             applyTable = $('#applyTable').bootstrapTable({
                 locale: 'zh-CN',
                 toolbar: '#leaveToolbar',
@@ -246,7 +246,7 @@
             });
         }),
         $('[data-itemcard-menu="3"]').on('click', () => {
-            if(revokeTable) return;
+            if(revokeTable) return $('#revokeTable').bootstrapTable('refresh', {});
             revokeTable = $('#revokeTable').bootstrapTable({
                 locale: 'zh-CN',
                 toolbar: '#reportToolbar',
@@ -377,7 +377,7 @@
             });
         }),
         $('[data-itemcard-menu="4"]').on('click', () => {
-            if(doneTable) return;
+            if(doneTable) return $('#doneTable').bootstrapTable('refresh', {});
             doneTable = $('#doneTable').bootstrapTable({
                 locale: 'zh-CN',
                 buttonsOrder: ['paginationSwitch', 'toggle', 'fullscreen', 'refresh', 'columns'],

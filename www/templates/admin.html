@@ -77,7 +77,7 @@
     <script>
         let studentTable = teacherTable = null;
         $('[data-itemcard-menu="2"]').on('click', () => {
-            if(studentTable) return;
+            if(studentTable) return $('#studentTable').bootstrapTable('refresh', {});
             studentTable = $('#studentTable').bootstrapTable({
                 locale: 'zh-CN',
                 toolbar: '#studentToolbar',
@@ -304,7 +304,7 @@
             });
         }),
         $('[data-itemcard-menu="3"]').on('click', () => {
-            if(teacherTable)  return;
+            if(teacherTable)  return $('#teacherTable').bootstrapTable('refresh', {});
             teacherTable = $('#teacherTable').bootstrapTable({
                 locale: 'zh-CN',
                 toolbar: '#teacherToolbar',

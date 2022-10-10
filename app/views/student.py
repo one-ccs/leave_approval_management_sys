@@ -63,13 +63,13 @@ def leaves():
                 'SELECT a.*,b.name a1,c.name a2,d.name r FROM leave a LEFT JOIN teacher b ON a.approver1_id=b.tid LEFT JOIN teacher c ON a.approver2_id=c.tid LEFT JOIN teacher d ON a.revoke_id=d.tid WHERE sid=? and state IN ("已完成", "已驳回", "已撤回")',
                 (sid, )
             )
+        dict = {
+            'state': 'ok',
+            'msg': '查询成功',
+            'length': len(result),
+            'data': []
+        }
         if result and len(result) > 0:
-            dict = {
-                'state': 'ok',
-                'msg': '查询成功',
-                'length': len(result),
-                'data': []
-            }
             for row in result:
                 dict['data'].append({
                     'id': row['id'],
@@ -83,9 +83,7 @@ def leaves():
                     'r': row['r'],
                     'state': row['state'],
                 })
-            res = make_response(dict, 200)
-        else:
-            res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+        res = make_response(dict, 200)
     if request.method == 'POST': # 新建申请、申请销假
         type = request.values.get('type')
         if type == 'apply':

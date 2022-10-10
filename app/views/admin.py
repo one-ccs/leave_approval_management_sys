@@ -42,13 +42,13 @@ def students():
     res = None
     if request.method == 'GET':
         result = db.execute('SELECT row_number() OVER(ORDER BY sid ASC) as "on",* FROM student')
+        dict = {
+            'state': 'ok',
+            'msg': '查询成功',
+            'length': len(result),
+            'data': []
+        }
         if result and len(result) > 0:
-            dict = {
-                'state': 'ok',
-                'msg': '查询成功',
-                'length': len(result),
-                'data': []
-            }
             for row in result:
                 dict['data'].append({
                     'on': row['on'],
@@ -61,9 +61,7 @@ def students():
                     'grade': row['grade'],
                     'class': row['class'],
                 })
-            res = make_response(dict, 200)
-        else:
-            res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+        res = make_response(dict, 200)
     if request.method == 'POST':
         sid = request.values.get('sid')
         name = request.values.get('name')
@@ -100,13 +98,13 @@ def teachers():
     res = None
     if request.method == 'GET':
         result = db.execute('SELECT row_number() OVER(ORDER BY tid ASC) as "on",teacher.*,role.role FROM teacher,role where teacher.tid=role.rid')
+        dict = {
+            'state': 'ok',
+            'msg': '查询成功',
+            'length': len(result),
+            'data': []
+        }
         if result and len(result) > 0:
-            dict = {
-                'state': 'ok',
-                'msg': '查询成功',
-                'length': len(result),
-                'data': []
-            }
             for row in result:
                 dict['data'].append({
                     'on': row['on'],
@@ -116,9 +114,7 @@ def teachers():
                     'telphone': row['telphone'],
                     'role': row['role'],
                 })
-            res = make_response(dict, 200)
-        else:
-            res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+        res = make_response(dict, 200)
     if request.method == 'POST':
         res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
     if request.method == 'DELETE':

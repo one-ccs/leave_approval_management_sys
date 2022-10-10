@@ -55,13 +55,13 @@ def leaves():
                 'SELECT a.*,b.name name,c.name a1,d.name a2 FROM leave a LEFT JOIN student b ON a.sid=b.sid LEFT JOIN teacher c ON a.approver1_id=c.tid LEFT JOIN teacher d ON a.approver2_id=d.tid WHERE b.tid=?',
                 (tid, )
             )
+        dict = {
+            'state': 'ok',
+            'msg': '查询成功',
+            'length': len(result),
+            'data': []
+        }
         if result and len(result) > 0:
-            dict = {
-                'state': 'ok',
-                'msg': '查询成功',
-                'length': len(result),
-                'data': []
-            }
             for row in result:
                 dict['data'].append({
                     'id': row['id'],
@@ -76,9 +76,7 @@ def leaves():
                     'a2': row['a2'],
                     'state': row['state'],
                 })
-            res = make_response(dict, 200)
-        else:
-            res = make_response({'state': 'fail', 'msg': '查询失败'}, 403)
+        res = make_response(dict, 200)
     if request.method == 'POST': # 同意或驳回申请
         ids = request.values.get('ids')
         if not ids:

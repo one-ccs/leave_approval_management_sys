@@ -64,7 +64,7 @@
     <script>
         let approvalTable = totalTable = null;
         $('[data-itemcard-menu="2"]').on('click', () => {
-            if(approvalTable) return;
+            if(approvalTable) return $('#approvalTable').bootstrapTable('refresh', {});
             approvalTable = $('#approvalTable').bootstrapTable({
                 locale: 'zh-CN',
                 toolbar: '#approvalToolbar',
@@ -296,7 +296,7 @@
             });
         }),
         $('[data-itemcard-menu="3"]').on('click', () => {
-            if(totalTable) return;
+            if(totalTable) return $('#totalTable').bootstrapTable('refresh', {});
             totalTable = $('#totalTable').bootstrapTable({
                 locale: 'zh-CN',
                 buttonsOrder: ['paginationSwitch', 'toggle', 'fullscreen', 'refresh', 'columns'],
