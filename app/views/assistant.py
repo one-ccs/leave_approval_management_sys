@@ -39,7 +39,7 @@ def root():
         args['headimg'] = headimg_path
     return render_template('/assistant.html', **args)
 
-@assistant_blue.route('/leaves', methods=['GET', 'POST', 'DELETE'])
+@assistant_blue.route('/leaves', methods=['GET', 'POST'])
 def leaves():
     res = None
     tid = session.get('role').get('rid')
@@ -133,13 +133,6 @@ def leaves():
                 res = make_response({'state': 'ok', 'msg': f'操作成功, 成功修改 {result} 条数据'}, 200)
             else:
                 res = make_response({'state': 'fail', 'msg': '操作失败'}, 403)
-    if request.method == 'DELETE': # 销假
-        id = request.form.get('id')
-        if not id:
-            return make_response({'state': 'fail', 'msg': '操作失败'}, 403)
-        result = db.execute('DELETE FROM leave WHERE id=?', (id, ))
-        if result:
-            res = make_response({'state': 'ok', 'msg': '撤销成功'}, 200)
         else:
-            res = make_response({'state': 'fail', 'msg': '撤销失败'}, 403)
+            res = make_response({'state': 'fail', 'msg': f'无效的请求类型 "{type}"'}, 403)
     return res

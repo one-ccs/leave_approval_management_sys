@@ -184,10 +184,11 @@
                 dialogConfirm('撤回申请', "确定撤回申请吗?", () => {
                     let form = new FormData();
                     form.append('id', leave.id);
+                    form.append('type', 'recall');
                     $.ajax({
                         async: !1,
                         crossDomain: !0,
-                        type: 'delete',
+                        type: 'post',
                         url: '/student/leaves',
                         headers: {
                             "cache-control": "no-cache"

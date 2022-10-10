@@ -114,18 +114,18 @@ def leaves():
                 res = make_response({'state': 'ok', 'msg': '销假申请成功'}, 200)
             else:
                 res = make_response({'state': 'fail', 'msg': '销假申请失败'}, 403)
+        elif type == 'recall':
+            id = request.values.get('id')
+            if not id:
+                return make_response({'state': 'fail', 'msg': '撤回失败, 未知的请假条 ID'}, 403)
+            result = db.execute('SELECT state FROM leave WHERE id=?', (id, ))
+            if not result or result[0]['state'] not in ('审批中', '待审批'):
+                return make_response({'state': 'fail', 'msg': f'撤回失败, 无法撤回状态为 "{result[0]["state"]}" 的请假条'}, 403)
+            result = db.execute('UPDATE leave SET state="已撤回" WHERE id=?', (id, ))
+            if result and result > 0:
+                res = make_response({'state': 'ok', 'msg': '撤回成功'}, 200)
+            else:
+                res = make_response({'state': 'fail', 'msg': '撤回失败'}, 403)
         else:
             res = make_response({'state': 'fail', 'msg': f'无效的请求类型 "{type}"'}, 403)
-    if request.method == 'DELETE': # 撤回
-        id = request.values.get('id')
-        if not id:
-            return make_response({'state': 'fail', 'msg': '撤回失败, 未知的请假条 ID'}, 403)
-        result = db.execute('SELECT state FROM leave WHERE id=?', (id, ))
-        if not result or result[0]['state'] not in ('审批中', '待审批'):
-            return make_response({'state': 'fail', 'msg': f'撤回失败, 无法撤回状态为 "{result[0]["state"]}" 的请假条'}, 403)
-        result = db.execute('UPDATE leave SET state="已撤回" WHERE id=?', (id, ))
-        if result and result > 0:
-            res = make_response({'state': 'ok', 'msg': '撤回成功'}, 200)
-        else:
-            res = make_response({'state': 'fail', 'msg': '撤回失败'}, 403)
     return res
