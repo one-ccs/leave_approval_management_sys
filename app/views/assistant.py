@@ -3,10 +3,8 @@
 from flask import request, session, make_response, render_template, url_for, redirect
 from os import path
 from app.views import assistant_blue
-from app.classes import Database
 from app.classes import Datetime
-
-db = Database('./db/data.db')
+from app import *
 
 
 @assistant_blue.before_request
@@ -34,7 +32,7 @@ def root():
             'rid': session.get('role').get('rid'),
             'name': session.get('role').get('name'),
         }
-    headimg_path = url_for('static', filename=f'img/user_head/{args["rid"]}.webp')
+    headimg_path = url_for('static', filename=f'user_upload/headimg/{args["rid"]}.webp')
     if path.isfile('www' + headimg_path):
         args['headimg'] = headimg_path
     return render_template('/assistant.html', **args)

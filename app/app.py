@@ -4,10 +4,17 @@ from flask import Flask, request, session, make_response, render_template, url_f
 from datetime import timedelta
 from app.classes import Database, Role
 
+DATABASE_FILE = './db/data.db'
+UPLOAD_FOLDER = './www/static/user_upload'
+ALLOWED_IMAGE_EXTENSIONS = set(['jpg', 'png', 'webp', 'gif'])
+
+db = Database(DATABASE_FILE)
+
 app = Flask(__name__, template_folder='../www/templates', static_folder='../www/static')
 app.config['SECRET_KEY'] = 'LmzwTvA1p5B2DODi$b2bfe2b68ef2ec99b86dd354e00d3c3c7f533ce18fe8a6f33f7c3af52396b1bb'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=1800)
-db = Database('./db/data.db')
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
+
 
 @app.before_request
 def check_login():
@@ -126,20 +133,13 @@ def user():
         res = redirect('/admin/')
     return res
 
-@app.route('/headimg', methods=['POST'])
-def headimg():
-    pass
-
-from app.views import errorhandle_blue
-from app.views import student_blue
-from app.views import assistant_blue
-from app.views import office_blue
-from app.views import attendance_blue
-from app.views import admin_blue
-
-app.register_blueprint(errorhandle_blue)
-app.register_blueprint(student_blue)
-app.register_blueprint(assistant_blue)
-app.register_blueprint(office_blue)
-app.register_blueprint(attendance_blue)
-app.register_blueprint(admin_blue)
+@app.route('/upload/<path:type>', methods=['POST'])
+def upload(type):
+    if type == 'headimg':
+        file_data = request.files.get('file_data')
+        if file_data:
+            filename = f'{session.get("role").get("rid")}.webp'
+            file_data.save(f'{UPLOAD_FOLDER}/headimg/{filename}')
+        return make_response({'state': 'ok', 'msg': '上传头像'}, 200)
+    else:
+        return make_response({'state': 'fail', 'msg': '不支持的操作, 访问已拒绝'}, 403)

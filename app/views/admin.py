@@ -3,9 +3,8 @@
 from flask import request, session, make_response, render_template, url_for, redirect
 from os import path
 from app.views import admin_blue
-from app.classes import Database, Student
-
-db = Database('./db/data.db')
+from app.classes import Student
+from app import *
 
 
 @admin_blue.before_request
@@ -32,7 +31,7 @@ def root():
             'rid': session.get('role').get('rid'),
             'name': session.get('role').get('name'),
         }
-    headimg_path = url_for('static', filename=f'img/user_head/{args["rid"]}.webp')
+    headimg_path = url_for('static', filename=f'user_upload/headimg/{args["rid"]}.webp')
     if path.isfile('www' + headimg_path):
         args['headimg'] = headimg_path
     return render_template('/admin.html', **args)

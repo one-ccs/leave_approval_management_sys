@@ -79,21 +79,24 @@ function dialogConfirm(title, msg, confirm=function(){}, cancel=function(){}) {
 }
 function createConfirmModal(kw={}) {
     let args = ['$button', 'indirectButton', 'id', 'title', 'body', 'buttonClick', 'confirmClick', 'cancelClick'];
-    for(let k in kw) if(args.indexOf(k) < 0) throw new ReferenceError(`无法识别的关键字 "${k}".`);
+    for(let k in kw) if(args.indexOf(k) < 0) throw new TypeError(`无法识别的关键字 "${k}".`);
 
-    let $button = kw.$button || $();
-    let id = kw.id || `_${(new Date()).valueOf()}_${parseInt(Math.random() * 1000)}`;
+    let $button = kw.$button || null;
     let indirectButton = kw.indirectButton === undefined? false: true;
+    let id = kw.id || `_${(new Date()).valueOf()}_${parseInt(Math.random() * 1000)}`;
     let title = kw.title || '标题';
     let body = kw.body || '内容';
     let buttonClick = kw.buttonClick || function(){};
     let confirmClick = kw.confirmClick || function(){};
     let cancelClick = kw.cancelClick || function(){};
 
+    if(!$button) throw new TypeError('必须传入参数 $button');
+
     let $modal = $(document.createElement('div'));
     $modal.attr('id', id),
     $modal.addClass('modal fade'),
     $modal.attr('role', 'dialog');
+    $modal.html(`<div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div class="modal-title">${title}</div> <button class="btn-close" data-bs-dismiss="modal"></button> </div> <div class="modal-body">${body}</div> <div class="modal-footer"> <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button> <button class="btn btn-primary">提交</button> </div> </div> </div>`);
 
     let $_btn = $(document.createElement('button'));
     if(indirectButton) {
@@ -122,22 +125,129 @@ function createConfirmModal(kw={}) {
         }
     };
 
-    $modal.html(`<div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div class="modal-title">${title}</div> <button class="btn-close" data-bs-dismiss="modal"></button> </div> <div class="modal-body">${body}</div> <div class="modal-footer"> <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button> <button class="btn btn-primary">提交</button> </div> </div> </div>`);
     $btnCancel = $modal.find('div.modal-footer > button.btn.btn-secondary');
     $btnConfirm = $modal.find('div.modal-footer > button.btn.btn-primary');
     $btnCancel.on('click', e => cancelClick(e, $modal, $btnCancel)),
     $btnConfirm.on('click', e => confirmClick(e, $modal, $btnConfirm)),
     $(document.body).append($modal);
 }
+function createUploadModal(kw={}) {
+    let args = [
+        '$button', 'indirectButton', 'id', 'title', 'footerClass',
+        'url', 'dropZoneTitle', 'dropZoneClickTitle', 'allowedFileTypes', 'allowedFileExtensions', 'minImageWidth', 'minImageHeight', 'maxImageWidth', 'maxImageHeight', 'maxFileSize', 'maxFileCount',
+        'buttonClick', 'confirmClick', 'cancelClick'];
+    for(let k in kw) if(args.indexOf(k) < 0) throw new TypeError(`无法识别的关键字 "${k}".`);
+
+    let $button = kw.$button || null;
+    let indirectButton = kw.indirectButton === undefined? false: true;
+    let id = kw.id || `_${(new Date()).valueOf()}_${parseInt(Math.random() * 1000)}`;
+    let title = kw.title || '标题';
+    let footerClass = kw.footerClass || null;
+
+    let url = kw.url || null;
+    let dropZoneTitle = kw.dropZoneTitle || '点击或拖拽文件至此处';
+    let dropZoneClickTitle = kw.dropZoneClickTitle || '';
+    let allowedFileTypes = kw.allowedFileTypes || null;
+    let allowedFileExtensions = kw.allowedFileExtensions || null;
+    let minImageWidth = kw.minImageWidth || null;
+    let minImageHeight = kw.minImageHeight || null;
+    let maxImageWidth = kw.maxImageWidth || null;
+    let maxImageHeight = kw.maxImageHeight || null;
+    let maxFileSize = kw.maxFileSize || 2048;
+    let maxFileCount = kw.maxFileCount || 1;
+
+    let buttonClick = kw.buttonClick || function(){};
+    let confirmClick = kw.confirmClick || function(){};
+    let cancelClick = kw.cancelClick || function(){};
+
+    if(!$button) throw new TypeError('必须传入参数 $button');
+    if(!url) throw new TypeError('必须传入参数 url');
+
+    let $modal = $(document.createElement('div'));
+    $modal.attr('id', id),
+    $modal.addClass('modal fade'),
+    $modal.attr('role', 'dialog');
+    $modal.html(`<div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div class="modal-title">${title}</div> <button class="btn-close" data-bs-dismiss="modal"></button> </div> <div class="modal-body"><input id="uploadbox" type="file"></div> <div class="modal-footer"> <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button> <button class="btn btn-primary">提交</button> </div> </div> </div>`);
+
+    $fileinput = $($modal).find('#uploadbox').fileinput({
+        uploadUrl: url,
+        language: 'zh',
+        theme: 'fa4',
+        previewClass: 'w-100',
+        frameClass: 'd-flex flex-column w-100',
+        mainClass: 'kv-hidden',
+        dropZoneTitle: dropZoneTitle,
+        dropZoneClickTitle: dropZoneClickTitle,
+        fileActionSettings: {
+            showUpload: true,
+            showRemove: true,
+            showZoom: true,
+        },
+        showCaption: true,
+        showPreview: true,
+        showRemove: false,
+        showUpload: true,
+        showCancel: true,
+        showClose: false,
+        showUploadedThumbs: true,
+        showBrowse: false,
+        browseOnZoneClick: true,
+        autoReplace: true,
+        allowedFileTypes: allowedFileTypes,
+        allowedFileExtensions: allowedFileExtensions,
+        minImageWidth: minImageWidth,
+        minImageHeight: minImageHeight,
+        maxImageWidth: maxImageWidth,
+        maxImageHeight: maxImageHeight,
+        maxFileSize: maxFileSize,
+        maxFileCount: maxFileCount,
+    });
+    if(footerClass) $($modal).find('.modal-footer').addClass(footerClass);
+
+    let $_btn = $(document.createElement('button'));
+    if(indirectButton) {
+        $_btn.hide();
+        $_btn.attr('data-bs-toggle', 'modal'),
+        $_btn.attr('data-bs-target', `#${id}`),
+        $button.on('click', e => buttonClick(e, $modal, $fileinput, $_btn)),
+        $(document.body).append($_btn);
+    }
+    else {
+        $button.attr('data-bs-toggle', 'modal'),
+        $button.attr('data-bs-target', `#${id}`),
+        $button.on('click', e => buttonClick(e, $modal, $fileinput, $button));
+    }
+    $modal.setTitle = function(title) {
+        $(this).find('.modal-title').html(title);
+    };
+    $modal.show = () => {
+        if(!$modal.hasClass('show')) {
+            indirectButton? $_btn.click(): $button.click();
+        }
+    };
+    $modal.hide = () => {
+        if($modal.hasClass('show')) {
+            indirectButton? $_btn.click(): $button.click();
+        }
+    };
+
+    $btnCancel = $modal.find('div.modal-footer > button.btn.btn-secondary');
+    $btnConfirm = $modal.find('div.modal-footer > button.btn.btn-primary');
+    $btnCancel.on('click', e => cancelClick(e, $modal, $fileinput, $btnCancel)),
+    $btnConfirm.on('click', e => confirmClick(e, $modal, $fileinput, $btnConfirm)),
+    $(document.body).append($modal);
+}
 function bindDragSelectEvent(kw={}) {
     let args = ['$table', 'uniqueId', 'uniqueIdType', 'onStart', 'onEnd'];
-    for(let k in kw) if(args.indexOf(k) < 0) throw new ReferenceError(`无法识别的关键字 "${k}".`);
+    for(let k in kw) if(args.indexOf(k) < 0) throw new TypeError(`无法识别的关键字 "${k}".`);
 
     let $table = kw.$table || $();
     let uniqueId = kw.uniqueId || '';
     let uniqueIdType = kw.uniqueIdType || 'string';
     let onStart = kw.onStart || function(){};
     let onEnd = kw.onEnd || function(){};
+
+    if(!$table) throw new TypeError('必须传入参数 $table');
 
     $($table).on('mousedown', e => {
         if($(e.target).closest('thead').length) return;
@@ -400,6 +510,19 @@ $('.itemcard > .itemcard-menu > .pagination > .page-item').not('.page-item.disab
 }),
 $(document).ready(function() {
     if($('#btnUserLR').text() !== '登录 / 注册') {
+        createUploadModal({
+            $button: $('.headimg-over'),
+            url: '/upload/headimg',
+            title: '上传头像',
+            footerClass: 'kv-hidden',
+            dropZoneTitle: '<i class="fa fa-cloud-upload" style="font-size: calc(3rem + 3vw);"></i><div class="fs-4">点击或拖拽图片至此处</div>',
+            dropZoneClickTitle: `<div class="fs-6">图片宽度*高度至少为 128*128 像素, 大小不超过 10MB</div>`,
+            allowedFileExtensions: ['jpg', 'png', 'webp', 'gif'],
+            minImageWidth: 128,
+            minImageHeight: 128,
+            maxFileSize: 1024 * 10,
+            maxFileCount: 1,
+        });
         switch(window.location.pathname) {
             case '/':
             case '/login':

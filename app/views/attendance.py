@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 from flask import request, session, make_response, render_template
 from app.views import attendance_blue
-from app.classes import Database
+from app import *
 
-db = Database('./db/data.db')
 
 @attendance_blue.before_request
 def check_login():
