@@ -114,12 +114,7 @@
                         css: css,
                     }
                 },
-                url: '/student/leaves',
-                queryParamsType: 'limit',
-                queryParams: function(params) {
-                    params.search = 'apply';
-                    return params;
-                },
+                url: '/student/leaves?query=apply',
                 columns: [{
                     field: 'radio',
                     title: '单选',
@@ -184,7 +179,7 @@
                 dialogConfirm('撤回申请', "确定撤回申请吗?", () => {
                     let form = new FormData();
                     form.append('id', leave.id);
-                    form.append('type', 'recall');
+                    form.append('action', 'recall');
                     $.ajax({
                         async: !1,
                         crossDomain: !0,
@@ -223,7 +218,7 @@
                     form.append('start_timestamp', sd),
                     form.append('end_timestamp', ed),
                     form.append('reason', reason);
-                    form.append('type', 'apply');
+                    form.append('action', 'apply');
                     $.ajax({
                         async: !1,
                         crossDomain: !0,
@@ -286,12 +281,7 @@
                         css: css,
                     }
                 },
-                url: '/student/leaves',
-                queryParamsType: 'limit',
-                queryParams: function(params) {
-                    params.search = 'revoke';
-                    return params;
-                },
+                url: '/student/leaves?query=revoke',
                 columns: [{
                     field: 'radio',
                     title: '单选',
@@ -356,7 +346,7 @@
                 dialogConfirm('申请销假', "确定申请销假吗?", () => {
                     let form = new FormData();
                     form.append('id', leave.id);
-                    form.append('type', 'revoke');
+                    form.append('action', 'revoke');
                     $.ajax({
                         async: !1,
                         crossDomain: !0,
@@ -418,12 +408,7 @@
                         css: css,
                     }
                 },
-                url: '/student/leaves',
-                queryParamsType: 'limit',
-                queryParams: function(params) {
-                    params.search = 'done';
-                    return params;
-                },
+                url: '/student/leaves?query=done',
                 columns: [{
                     field: 'id', 
                     title: '编号', 

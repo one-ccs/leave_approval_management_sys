@@ -9,7 +9,10 @@ from app import *
 @student_blue.before_request
 def check_login():
     if 'role' not in session:
-        return redirect('/session')
+        if request.path == '/student/':
+            return redirect('/session')
+        else:
+            return make_response({'state': 'fail', 'msg': '请登录后操作'}, 401)
     if session.get('role').get('role') != '学生':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
 
@@ -45,22 +48,24 @@ def leaves():
     sid = session.get('role').get('rid')
     if request.method == 'GET': # 查询
         result = None
-        search = request.values.get('search')
-        if search == 'apply': # 请假
+        query = request.values.get('query')
+        if query == 'apply': # 请假
             result = db.execute(
                 'SELECT a.*,b.name a1,c.name a2,d.name r FROM leave a LEFT JOIN teacher b ON a.approver1_id=b.tid LEFT JOIN teacher c ON a.approver2_id=c.tid LEFT JOIN teacher d ON a.revoke_id=d.tid WHERE sid=? and state IN ("待审批", "审批中")',
                 (sid, )
             )
-        elif search == 'revoke': # 销假
+        elif query == 'revoke': # 销假
             result = db.execute(
                 'SELECT a.*,b.name a1,c.name a2,d.name r FROM leave a LEFT JOIN teacher b ON a.approver1_id=b.tid LEFT JOIN teacher c ON a.approver2_id=c.tid LEFT JOIN teacher d ON a.revoke_id=d.tid WHERE sid=? and state IN ("待销假", "销假中")',
                 (sid, )
             )
-        elif search == 'done': # 已完成
+        elif query == 'done': # 已完成
             result = db.execute(
                 'SELECT a.*,b.name a1,c.name a2,d.name r FROM leave a LEFT JOIN teacher b ON a.approver1_id=b.tid LEFT JOIN teacher c ON a.approver2_id=c.tid LEFT JOIN teacher d ON a.revoke_id=d.tid WHERE sid=? and state IN ("已完成", "已驳回", "已撤回")',
                 (sid, )
             )
+        else:
+            return make_response({'state': 'fail', 'msg': f'不支持的查询 "{query}", 请求已拒绝'}, 403)
         dict = {
             'state': 'ok',
             'msg': '查询成功',
@@ -82,8 +87,8 @@ def leaves():
             })
         res = make_response(dict, 200)
     if request.method == 'POST': # 新建申请、申请销假
-        type = request.values.get('type')
-        if type == 'apply':
+        action = request.values.get('action')
+        if action == 'apply':
             category = request.values.get('category')
             start_timestamp = request.values.get('start_timestamp')
             end_timestamp = request.values.get('end_timestamp')
@@ -100,7 +105,7 @@ def leaves():
                 res = make_response({'state': 'ok', 'msg': '申请成功'}, 200)
             else:
                 res = make_response({'state': 'fail', 'msg': '申请失败, 开始日期必须大于当前日期, 结束日期必须大于开始日期'}, 403)
-        elif type == 'revoke':
+        elif action == 'revoke':
             id = request.values.get('id')
             if not id:
                 return make_response({'state': 'fail', 'msg': '销假申请失败, 未知的请假条 ID'}, 403)
@@ -112,7 +117,7 @@ def leaves():
                 res = make_response({'state': 'ok', 'msg': '销假申请成功'}, 200)
             else:
                 res = make_response({'state': 'fail', 'msg': '销假申请失败'}, 403)
-        elif type == 'recall':
+        elif action == 'recall':
             id = request.values.get('id')
             if not id:
                 return make_response({'state': 'fail', 'msg': '撤回失败, 未知的请假条 ID'}, 403)
@@ -125,5 +130,5 @@ def leaves():
             else:
                 res = make_response({'state': 'fail', 'msg': '撤回失败'}, 403)
         else:
-            res = make_response({'state': 'fail', 'msg': f'无效的请求类型 "{type}"'}, 403)
+            res = make_response({'state': 'fail', 'msg': f'不支持的操作 "{action}"'}, 403)
     return res

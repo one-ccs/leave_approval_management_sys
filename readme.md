@@ -6,7 +6,7 @@
 
 ## 技术栈
 
-前端：HTML、CSS、JavaScript、JQuery、JQuery-Confirm、Bootstrap 5、BootstraTable、DataTable、Font Awesome
+前端：HTML、CSS、JavaScript、JQuery、JQuery-Confirm、Bootstrap 5、BootstraTable、BootstrapFileinput、FontAwesome 4
 
 后端：Python、Flask、SQLite
 
@@ -55,6 +55,6 @@
 
 2. Python 安装 Flask 包，安装命令：pip install flask（在 cmd 中输入）
 
-3. 双击 app.py 运行服务器
+3. 双击 launch.py 运行服务器
 
 4. 浏览器打开网址 [localhost:5000](http://localhost:5000/)

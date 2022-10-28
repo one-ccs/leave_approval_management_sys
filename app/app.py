@@ -133,13 +133,13 @@ def user():
         res = redirect('/admin/')
     return res
 
-@app.route('/upload/<path:type>', methods=['POST'])
-def upload(type):
-    if type == 'headimg':
+@app.route('/upload/<path:key>', methods=['POST'])
+def upload(key):
+    if key == 'headimg':
         file_data = request.files.get('file_data')
         if file_data:
             filename = f'{session.get("role").get("rid")}.webp'
             file_data.save(f'{UPLOAD_FOLDER}/headimg/{filename}')
         return make_response({'state': 'ok', 'msg': '上传头像'}, 200)
     else:
-        return make_response({'state': 'fail', 'msg': '不支持的操作, 访问已拒绝'}, 403)
+        return make_response({'state': 'fail', 'msg': '不支持的操作, 已拒绝'}, 403)

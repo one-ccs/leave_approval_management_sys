@@ -94,7 +94,7 @@
                 pagination: true,
                 search: true,
                 searchTimeOut: 300,
-                minimumCountColumns: 3,
+                minimumCountColumns: 6,
                 clickToSelect: true,
                 multipleSelectRow: true,
                 detailView: true,
@@ -103,7 +103,7 @@
                     return `${row.name} (${row.sid}) ${row.department} ${row.faculty} ${row.major} ${row.class}班`;
                 },
                 sortable: true,
-                url: '/admin/students',
+                url: '/admin/students?query=all',
                 columns: [{
                     field: 'select',
                     title: '复选', 
@@ -114,6 +114,12 @@
                     sortable: true,
                     align: 'center', 
                     width: 1,
+                }, {
+                    field: 'id', 
+                    title: 'id', 
+                    sortable: true,
+                    align: 'center',
+                    visible: false,
                 }, {
                     field: 'sid', 
                     title: '学号', 
@@ -127,7 +133,16 @@
                     field: 'gender', 
                     title: '性别', 
                     sortable: true,
-                    align: 'center', 
+                }, {
+                    field: 'tid', 
+                    title: '辅导员 ID', 
+                    sortable: true,
+                    align: 'center',
+                    visible: false,
+                }, {
+                    field: 'tname', 
+                    title: '辅导员', 
+                    sortable: true,
                 }, {
                     field: 'department', 
                     title: '学部', 
@@ -222,12 +237,17 @@
                 indirectButton: true,
                 id: 'modifyStudentModal',
                 title: '修改学生信息',
-                body: '<form id="modifyStudentForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="sid"> <label class="form-label float-start" for="sid">学号</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="department"> <label class="form-label" for="department">学部</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="faculty"> <label class="form-label" for="faculty">系别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="major"> <label class="form-label" for="major">专业</label> </div> <div class="row mt-3"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="grade"> <label class="form-label" for="grade">年级</label> </div> </div> <dic class="col"> <div class="form-floating"> <input class="form-control" type="text" name="class"> <label class="form-label" for="class">班级</label> </div> </dic> </div> </form>',
+                body: '<form id="modifyStudentForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入学号" name="sid"> <label class="form-label float-start" for="sid">学号</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入姓名" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入性别" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <select name="assistant" class="form-select"> <option value="None">None</option> </select> <label for="assistant" class="form-label">辅导员</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入学部" name="department"> <label class="form-label" for="department">学部</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入系别" name="faculty"> <label class="form-label" for="faculty">系别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入专业" name="major"> <label class="form-label" for="major">专业</label> </div> <div class="row mt-3"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入年级" name="grade"> <label class="form-label" for="grade">年级</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入班级" name="class"> <label class="form-label" for="class">班级</label> </div> </div> </div> </form>',
                 buttonClick: function(e, $modal, $button) {
                     let list = $('#studentTable').bootstrapTable('getSelections');
                     if(list.length === 0) return dialogWarning('未选择任何数据!');
                     $modal.show();
-                    if(list.length > 1) $modal.setTitle(`批量修改学生数据 (共 ${list.length} 个)`);
+                    if(list.length > 1) {
+                        $modal.setTitle(`批量修改学生数据 (共 ${list.length} 个)`);
+                    }
+                    else {
+                        $modal.setTitle(`修改用户 - ${list[0].name}`);
+                    }
                     $(document.forms.modifyStudentForm['sid']).removeAttr('disabled'),
                     $(document.forms.modifyStudentForm['name']).removeAttr('disabled'),
                     $(document.forms.modifyStudentForm['gender']).removeAttr('disabled');
@@ -236,17 +256,18 @@
                         if(list.length > 1) {
                             $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true'),
                             $(document.forms.modifyStudentForm['name']).attr('disabled', 'true'),
-                            $(document.forms.modifyStudentForm['gender']).attr('disabled', 'true'),
-                            document.forms.modifyStudentForm['sid'].value    = '多个值',
-                            document.forms.modifyStudentForm['name'].value   = '多个值',
+                            $(document.forms.modifyStudentForm['gender']).attr('disabled', 'true');
+                            document.forms.modifyStudentForm['sid'].value    = '多个值';
+                            document.forms.modifyStudentForm['name'].value   = '多个值';
                             document.forms.modifyStudentForm['gender'].value = '多个值';
                         }
                         else {
-                            $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true'),
+                            $(document.forms.modifyStudentForm['sid']).attr('disabled', 'true');
                             document.forms.modifyStudentForm['sid'].value    = row.sid;
                             document.forms.modifyStudentForm['name'].value   = row.name;
                             document.forms.modifyStudentForm['gender'].value = row.gender;
                         }
+                        initAssistantSelect(document.forms.modifyStudentForm['assistant'], row.tid);
                         document.forms.modifyStudentForm['department'].value = row.department;
                         document.forms.modifyStudentForm['faculty'].value    = row.faculty;
                         document.forms.modifyStudentForm['major'].value      = row.major;
@@ -255,22 +276,29 @@
                     }
                 },
                 confirmClick: function() {
-                    let sid = document.forms.modifyStudentForm['sid'].value;
+                    let selections = $('#studentTable').bootstrapTable('getSelections');
+                    let ids = selections.map(value => value.id);
+
                     let name = document.forms.modifyStudentForm['name'].value;
                     let gend = document.forms.modifyStudentForm['gender'].value;
+                    let tid = document.forms.modifyStudentForm['assistant'].value;
                     let depa = document.forms.modifyStudentForm['department'].value;
                     let facu = document.forms.modifyStudentForm['faculty'].value;
                     let majo = document.forms.modifyStudentForm['major'].value;
+                    let grad = document.forms.modifyStudentForm['grade'].value;
                     let clas = document.forms.modifyStudentForm['class'].value;
 
                     let form = new FormData();
-                    form.append('sid', sid);
+                    form.append('ids', ids);
                     form.append('name', name);
                     form.append('gender', gend);
+                    form.append('tid', tid);
                     form.append('department', depa);
                     form.append('faculty', facu);
                     form.append('major', majo);
+                    form.append('grade', grad);
                     form.append('class', clas);
+                    form.append('action', 'modify');
                     $.ajax({
                         async: !1,
                         crossDomain: !0,
@@ -284,7 +312,12 @@
                         mimeType: "multipart/form-data",
                         data: form
                     }).done((function(data) {
-                        dialogInfo('修改成功, 请刷新页面查看');
+                        data = JSON.parse(data);
+
+                        dialogInfo(data.msg, function() {
+                            $('#modifyStudentModal').get(0).hide(),
+                            $('#studentTable').bootstrapTable('refresh');
+                        });
                     })).fail((function(jqXHR) {
                         dialogError(JSON.parse(jqXHR.responseText).msg);
                     }));
@@ -294,12 +327,39 @@
                 $button: $('#btnStudentAdd'),
                 id: 'addStudentModal',
                 title: '添加学生信息',
-                body: '<form id="addStudentForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="sid"> <label class="form-label float-start" for="sid">学号</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="department"> <label class="form-label" for="department">学部</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="faculty"> <label class="form-label" for="faculty">系别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="major"> <label class="form-label" for="major">专业</label> </div> <div class="row mt-3"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" name="grade"> <label class="form-label" for="grade">年级</label> </div> </div> <dic class="col"> <div class="form-floating"> <input class="form-control" type="text" name="class"> <label class="form-label" for="class">班级</label> </div> </dic> </div> </form>',
+                body: '<form id="addStudentForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入学号" name="sid" value="系统自动生成" disabled> <label class="form-label float-start" for="sid">学号</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入姓名" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入性别" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <select name="assistant" class="form-select"> <option value="None">None</option> </select> <label for="assistant" class="form-label">辅导员</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入学部" name="department"> <label class="form-label" for="department">学部</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入系别" name="faculty"> <label class="form-label" for="faculty">系别</label> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入专业" name="major"> <label class="form-label" for="major">专业</label> </div> <div class="row mt-3"> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入年级" name="grade"> <label class="form-label" for="grade">年级</label> </div> </div> <div class="col"> <div class="form-floating"> <input class="form-control" type="text" placeholder="请输入班级" name="class"> <label class="form-label" for="class">班级</label> </div> </div> </div> </form>',
                 buttonClick: function() {
-
+                    initAssistantSelect(document.forms.addStudentForm['assistant']);
                 },
                 confirmClick: function() {
+                    let name = document.forms.addUserForm['name'].value;
+                    let password = document.forms.addUserForm['password'].value;
+                    if(!name || !password) return dialogWarning('用户名和密码不能为空');
 
+                    let password_check = document.forms.addUserForm['password-check'].value;
+                    if(password != password_check) return dialogWarning('密码不一致');
+
+                    let form = new FormData();
+                    form.append('name', name);
+                    form.append('password', password);
+                    form.append('action', 'add');
+                    $.ajax({
+                        async: !1,
+                        crossDomain: !0,
+                        url: "/admin/students",
+                        method: "POST",
+                        headers: {
+                            "cache-control": "no-cache"
+                        },
+                        processData: !1,
+                        contentType: !1,
+                        mimeType: "multipart/form-data",
+                        data: form
+                    }).done((function(data) {
+                        dialogInfo('添加成功, 请刷新页面查看');
+                    })).fail((function(jqXHR) {
+                        dialogError(JSON.parse(jqXHR.responseText).msg);
+                    }));
                 },
             });
         }),
@@ -330,7 +390,7 @@
                     return `${row.name} ${row.telphone}`;
                 },
                 sortable: true,
-                url: '/admin/teachers',
+                url: '/admin/teachers?query=all',
                 columns: [{
                     checkbox: true, 
                 }, {
@@ -339,6 +399,12 @@
                     sortable: true,
                     align: 'center', 
                     width: 1,
+                }, {
+                    field: 'id', 
+                    title: 'id', 
+                    sortable: true,
+                    align: 'center',
+                    visible: false,
                 }, {
                     field: 'tid', 
                     title: '教师编号', 
@@ -434,49 +500,61 @@
                 indirectButton: true,
                 id: 'modifyTeacherModal',
                 title: '修改教师信息',
-                body: '<form id="modifyTeacherForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="tid"> <label class="form-label" for="tid">ID</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="telphone"> <label class="form-label" for="telphone">电话号码</label> </div> <div class="form-floating mt-3"> <select class="form-select" name="role"> <option value="辅导员">辅导员</option> <option value="教务处">教务处</option> <option value="考勤">考勤</option> </select> <label class="form-label float-start" for="role">职能</label> </div> </form>',
+                body: '<form id="modifyTeacherForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入教师编号" name="tid"> <label class="form-label" for="tid">教师编号</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入姓名" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <select class="form-select" name="gender"> <option value="男">男</option> <option value="女">女</option> </select> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入电话号码" name="telphone"> <label class="form-label" for="telphone">电话号码</label> </div> <div class="form-floating mt-3"> <select class="form-select" name="role"> <option value="辅导员">辅导员</option> <option value="教务处">教务处</option> <option value="考勤">考勤</option> </select> <label class="form-label" for="role">职能</label> </div> </form>',
                 buttonClick: function(e, $modal, $button) {
                     let list = $('#teacherTable').bootstrapTable('getSelections');
                     if(list.length === 0) return dialogWarning('未选择任何数据!');
                     $modal.show();
-                    if(list.length > 1) $modal.setTitle(`批量修改教师数据 (共 ${list.length} 个)`);
+                    if(list.length > 1) {
+                        $modal.setTitle(`批量修改教师数据 (共 ${list.length} 个)`);
+                    }
+                    else {
+                        $modal.setTitle(`修改用户 - ${list[0].name}`);
+                    }
                     $(document.forms.modifyTeacherForm['tid']).removeAttr('disabled'),
                     $(document.forms.modifyTeacherForm['name']).removeAttr('disabled'),
-                    $(document.forms.modifyTeacherForm['gender']).removeAttr('disabled');
+                    $(document.forms.modifyTeacherForm['gender']).removeAttr('disabled'),
                     $(document.forms.modifyTeacherForm['telphone']).removeAttr('disabled');
                     let row = list[0];
                     if(row) {
                         if(list.length > 1) {
                             $(document.forms.modifyTeacherForm['tid']).attr('disabled', 'true'),
                             $(document.forms.modifyTeacherForm['name']).attr('disabled', 'true'),
-                            $(document.forms.modifyTeacherForm['gender']).attr('disabled', 'true'),
-                            $(document.forms.modifyTeacherForm['telphone']).attr('disabled', 'true'),
-                            document.forms.modifyTeacherForm['tid'].value      = '多个值',
-                            document.forms.modifyTeacherForm['name'].value     = '多个值',
-                            document.forms.modifyTeacherForm['gender'].value   = '多个值';
+                            $(document.forms.modifyTeacherForm['telphone']).attr('disabled', 'true');
+                            document.forms.modifyTeacherForm['tid'].value      = '多个值';
+                            document.forms.modifyTeacherForm['name'].value     = '多个值';
+                            document.forms.modifyTeacherForm['gender'].value   = '';
                             document.forms.modifyTeacherForm['telphone'].value = '多个值';
+                            document.forms.modifyTeacherForm['role'].value     = '';
                         }
                         else {
-                            $(document.forms.modifyTeacherForm['tid']).attr('disabled', 'true'),
                             document.forms.modifyTeacherForm['tid'].value      = row.tid;
                             document.forms.modifyTeacherForm['name'].value     = row.name;
                             document.forms.modifyTeacherForm['gender'].value   = row.gender;
                             document.forms.modifyTeacherForm['telphone'].value = row.telphone;
+                            document.forms.modifyTeacherForm['role'].value     = row.role;
                         }
-                        document.forms.modifyTeacherForm['role'].value = row.role;
                     }
                 },
                 confirmClick: function() {
-                    let ancestry = self.parentNode.parentNode;
-                    if(!ancestry) {
-                        return dialogError('操作失败, 请联系管理员!');
-                    }
-                    let tid = $(ancestry).children().first().text();
-                    if(!tid) {
-                        return dialogError('操作失败, 请联系管理员!');
-                    }
+                    let selections = $('#teacherTable').bootstrapTable('getSelections');
+                    let ids = selections.map(value => value.id);
+                    let tids = selections.map(value => value.tid);
+
+                    let tid = document.forms.modifyTeacherForm['tid'].value;
+                    let name = document.forms.modifyTeacherForm['name'].value;
+                    let gend = document.forms.modifyTeacherForm['gender'].value;
+                    let telp = document.forms.modifyTeacherForm['telphone'].value;
+                    let role = document.forms.modifyTeacherForm['role'].value;
+
                     let form = new FormData();
-                    form.append('id', tid);
+                    form.append('ids', ids);
+                    form.append('tids', tids);
+                    form.append('name', name);
+                    form.append('gender', gend);
+                    form.append('telphone', telp);
+                    form.append('role', role);
+                    form.append('action', 'modify');
                     $.ajax({
                         async: !1,
                         crossDomain: !0,
@@ -490,7 +568,12 @@
                         mimeType: "multipart/form-data",
                         data: form
                     }).done((function(data) {
-                        dialogInfo('修改成功, 请刷新页面查看');
+                        data = JSON.parse(data);
+
+                        dialogInfo(data.msg, function() {
+                            $('#modifyTeacherModal').get(0).hide(),
+                            $('#teacherTable').bootstrapTable('refresh');
+                        });
                     })).fail((function(jqXHR) {
                         dialogError(JSON.parse(jqXHR.responseText).msg);
                     }));
@@ -500,7 +583,7 @@
                 $button: $('#btnTeacherAdd'),
                 id: 'addTeacherModal',
                 title: '添加教师信息',
-                body: '<form id="addTeacherForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="tid"> <label class="form-label" for="tid">ID</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" name="gender"> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" name="telphone"> <label class="form-label" for="telphone">电话号码</label> </div> <div class="form-floating mt-3"> <select class="form-select" name="role"> <option value="辅导员">辅导员</option> <option value="教务处">教务处</option> <option value="考勤">考勤</option> </select> <label class="form-label float-start" for="role">职能</label> </div> </form>',
+                body: '<form id="addTeacherForm" class="container rounded mx-auto"> <div class="row"> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入教师编号" name="tid"> <label class="form-label" for="tid">教师编号</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入姓名" name="name"> <label class="form-label" for="name">姓名</label> </div> </div> <div class="col"> <div class="form-floating mt-3"> <select class="form-select" name="gender"> <option value="男">男</option> <option value="女">女</option> </select> <label class="form-label" for="gender">性别</label> </div> </div> </div> <div class="form-floating mt-3"> <input class="form-control" type="text" placeholder="请输入电话号码" name="telphone"> <label class="form-label" for="telphone">电话号码</label> </div> <div class="form-floating mt-3"> <select class="form-select" name="role"> <option value="辅导员">辅导员</option> <option value="教务处">教务处</option> <option value="考勤">考勤</option> </select> <label class="form-label" for="role">职能</label> </div> </form>',
                 buttonClick: function() {
 
                 },

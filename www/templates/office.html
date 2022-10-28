@@ -106,12 +106,7 @@
                         css: css,
                     }
                 },
-                url: '/office/leaves',
-                queryParamsType: 'limit',
-                queryParams: function(params) {
-                    params.search = 'approval';
-                    return params;
-                },
+                url: '/office/leaves?query=approval',
                 columns: [{
                     field: 'select',
                     title: '复选',
@@ -250,7 +245,7 @@
                 dialogConfirm('警告', `<div class="my-1 text-center text-danger">确定要驳回 ${refuses.length} 条申请吗? 该操作无法撤销! <br><small class="text-secondary">(已过滤 ${fails.length} 无效数据)</small></div><br>` + html, () => {
                     let form = new FormData();
                     form.append('ids', refuses.map(value => value.id));
-                    form.append('type', 'refuse');
+                    form.append('action', 'refuse');
                     $.ajax({
                         async: !1,
                         crossDomain: !0,
@@ -309,7 +304,7 @@
                 dialogConfirm('警告', `<div class="my-1 text-center text-danger">确定要同意 ${passes.length} 条申请吗? 该操作无法撤销! <br><small class="text-secondary">(已过滤 ${fails.length} 无效数据)</small></div><br>` + html, () => {
                     let form = new FormData();
                     form.append('ids', passes.map(value => value.id));
-                    form.append('type', 'agree');
+                    form.append('action', 'agree');
                     $.ajax({
                         async: !1,
                         crossDomain: !0,
@@ -382,12 +377,7 @@
                         css: css,
                     }
                 },
-                url: '/office/leaves',
-                queryParamsType: 'limit',
-                queryParams: function(params) {
-                    params.search = 'total';
-                    return params;
-                },
+                url: '/office/leaves?query=total',
                 columns: [{
                     field: 'id',
                     title: '编号',

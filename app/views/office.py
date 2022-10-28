@@ -9,7 +9,10 @@ from app import *
 @office_blue.before_request
 def check_login():
     if 'role' not in session:
-        return redirect('/session')
+        if request.path == '/office/':
+            return redirect('/session')
+        else:
+            return make_response({'state': 'fail', 'msg': '请登录后操作'}, 401)
     if session.get('role').get('role') != '教务处':
         return make_response({'state': 'fail', 'msg': '非法操作, 拒绝访问'}, 403)
 
@@ -42,11 +45,13 @@ def leaves():
     tid = session.get('role').get('rid')
     if request.method == 'GET': # 返回待审批及总览
         result = []
-        search = request.values.get('search')
-        if search == 'approval':
+        query = request.values.get('query')
+        if query == 'approval':
             result = db.execute('SELECT a.*,b.name name,c.name a1,d.name a2, e.name r FROM leave a LEFT JOIN student b ON a.sid=b.sid LEFT JOIN teacher c ON a.approver1_id=c.tid LEFT JOIN teacher d ON a.approver2_id=d.tid LEFT JOIN teacher e ON a.revoke_id=e.tid WHERE state IN ("待审批", "审批中", "销假中")')
-        elif search == 'total':
+        elif query == 'total':
             result = db.execute('SELECT a.*,b.name name,c.name a1,d.name a2, e.name r FROM leave a LEFT JOIN student b ON a.sid=b.sid LEFT JOIN teacher c ON a.approver1_id=c.tid LEFT JOIN teacher d ON a.approver2_id=d.tid LEFT JOIN teacher e ON a.revoke_id=e.tid')
+        else:
+            return make_response({'state': 'fail', 'msg': f'不支持的查询 "{query}", 请求已拒绝'}, 403)
         dict = {
             'state': 'ok',
             'msg': '查询成功',
@@ -77,8 +82,8 @@ def leaves():
         if not ids:
             return make_response({'state': 'fail', 'msg': '未提供要删除的学号'}, 403)
         ids = ids.split(',')
-        type = request.values.get('type')
-        if type == 'agree': # 同意
+        action = request.values.get('action')
+        if action == 'agree': # 同意
             result, values = None, []
             for id in ids:
                 # 查询请假条状态, 过滤无效请假条
@@ -105,7 +110,7 @@ def leaves():
                 res = make_response({'state': 'ok', 'msg': f'操作成功, 成功修改 {result1 + result2} 条数据'}, 200)
             else:
                 res = make_response({'state': 'fail', 'msg': '操作失败'}, 403)
-        elif type == 'refuse': # 驳回
+        elif action == 'refuse': # 驳回
             result, refuses = None, []
             for id in ids:
                 # 查询请假条状态, 过滤无效请假条
@@ -124,5 +129,5 @@ def leaves():
             else:
                 res = make_response({'state': 'fail', 'msg': '操作失败'}, 403)
         else:
-            res = make_response({'state': 'fail', 'msg': f'无效的请求类型 "{type}"'}, 403)
+            res = make_response({'state': 'fail', 'msg': f'不支持的操作 "{action}"'}, 403)
     return res

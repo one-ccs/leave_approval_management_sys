@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from traitlets import Instance
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -20,11 +19,11 @@ class User:
 
     @id.setter
     def id(self, id):
-        if not Instance(id, int):
+        if not isinstance(id, int):
             try:
                 id = int(id)
             except:
-                raise TypeError('类型错误: id 必须为自然数.')
+                raise TypeError(f'类型错误: id 必须为自然数 (id={id}).')
         if id < 0:
             raise TypeError('类型错误: id 必须大于 0.')
         self.__id = id

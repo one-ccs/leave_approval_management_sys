@@ -77,7 +77,7 @@ function dialogConfirm(title, msg, confirm=function(){}, cancel=function(){}) {
         }
     });
 }
-function createConfirmModal(kw={}) {
+function createConfirmModal(kw={}) { // 创建提交模态框
     let args = ['$button', 'indirectButton', 'id', 'title', 'body', 'buttonClick', 'confirmClick', 'cancelClick'];
     for(let k in kw) if(args.indexOf(k) < 0) throw new TypeError(`无法识别的关键字 "${k}".`);
 
@@ -111,15 +111,15 @@ function createConfirmModal(kw={}) {
         $button.attr('data-bs-target', `#${id}`),
         $button.on('click', e => buttonClick(e, $modal, $button));
     }
-    $modal.setTitle = function(title) {
+    $modal.get(0).setTitle = $modal.setTitle = function(title) {
         $(this).find('.modal-title').html(title);
     };
-    $modal.show = () => {
+    $modal.get(0).show = $modal.show = () => {
         if(!$modal.hasClass('show')) {
             indirectButton? $_btn.click(): $button.click();
         }
     };
-    $modal.hide = () => {
+    $modal.get(0).hide = $modal.hide = () => {
         if($modal.hasClass('show')) {
             indirectButton? $_btn.click(): $button.click();
         }
@@ -131,7 +131,7 @@ function createConfirmModal(kw={}) {
     $btnConfirm.on('click', e => confirmClick(e, $modal, $btnConfirm)),
     $(document.body).append($modal);
 }
-function createUploadModal(kw={}) {
+function createUploadModal(kw={}) { // 创建上传文件模态框
     let args = [
         '$button', 'indirectButton', 'id', 'title', 'footerClass',
         'url', 'dropZoneTitle', 'dropZoneClickTitle', 'allowedFileTypes', 'allowedFileExtensions', 'minImageWidth', 'minImageHeight', 'maxImageWidth', 'maxImageHeight', 'maxFileSize', 'maxFileCount',
@@ -237,7 +237,7 @@ function createUploadModal(kw={}) {
     $btnConfirm.on('click', e => confirmClick(e, $modal, $fileinput, $btnConfirm)),
     $(document.body).append($modal);
 }
-function bindDragSelectEvent(kw={}) {
+function bindDragSelectEvent(kw={}) { // 给 Table 绑定拖选事件
     let args = ['$table', 'uniqueId', 'uniqueIdType', 'onStart', 'onEnd'];
     for(let k in kw) if(args.indexOf(k) < 0) throw new TypeError(`无法识别的关键字 "${k}".`);
 
@@ -369,6 +369,42 @@ function bindDragSelectEvent(kw={}) {
             'display': 'none',
         });
     });
+}
+
+
+function initAssistantSelect(select, selectedTid='') { // 获取并设置辅导员列表
+    if(select.options[0].value == 'None') {
+        $.ajax({
+            async: !1,
+            crossDomain: !0,
+            url: "/admin/teachers?query=simple",
+            method: "GET",
+            headers: {
+                "cache-control": "no-cache"
+            },
+            processData: !1,
+            contentType: !1,
+            mimeType: "multipart/form-data",
+        }).done(function(data) {
+            data = JSON.parse(data);
+    
+            select.options.length = 0;
+            for(kv of data.data) {
+                let option = document.createElement('option');
+                $(option).val(kv.tid),
+                $(option).text(`${kv.tid} ${kv.name}`);
+    
+                select.options.add(option);
+            }
+        }).fail(function(jqXHR) {
+            dialogError(JSON.parse(jqXHR.responseText).msg);
+        });
+    }
+    if(selectedTid) {
+        for(option of select.options) {
+            if(option.value == selectedTid) option.selected = true;
+        }
+    }
 }
 function login() {
     $('#formLogin').addClass('was-validated');
