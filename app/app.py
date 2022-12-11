@@ -105,7 +105,7 @@ def regist():
         )
         if result1 and result1 > 0:
             result2 = db.execute(
-                'INSERT INTO student(sid,name) VALUES(?,?)',
+                'INSERT INTO student(sid,name,tid) VALUES(?,?,"000000")',
                 (role.rid, role.name)
             )
             if result2 and result2 > 0:
