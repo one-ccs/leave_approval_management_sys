@@ -87,7 +87,6 @@ def students():
             grad = request.values.get('grade')
             clas = request.values.get('class')
 
-            res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
             if len(ids) == 1: # 单独修改
                 result = db.execute(
                     'UPDATE student SET tid=?,name=?,gender=?,department=?,faculty=?,major=?,grade=?,class=? WHERE id=?',
@@ -95,6 +94,8 @@ def students():
                 )
                 if result:
                     res = make_response({'state': 'ok', 'msg': f'修改成功, 修改 {result} 条数据'}, 200)
+                else:
+                    res = make_response({'state': 'fail', 'msg': f'结果: 修改失败;<br>原因: : {db.last_error}'}, 403)
             else: # 批量修改
                 list = []
                 for id in ids:
@@ -105,6 +106,8 @@ def students():
                 )
                 if result:
                     res = make_response({'state': 'ok', 'msg': f'修改成功, 修改 {result} 条数据'}, 200)
+                else:
+                    res = make_response({'state': 'fail', 'msg': f'结果: 修改失败（批量）;<br>原因: : {db.last_error}'}, 403)
         elif action == 'add':
             name, password = request.values.get('name'), request.values.get('password')
             if not name or not password:
@@ -179,30 +182,29 @@ def teachers():
         action = request.values.get('action')
         if action == 'modify':
             ids = request.values.get('ids')
+            tids = request.values.get('tids')
             if not ids or len(ids) == 0:
                 return make_response({'state': 'fail', 'msg': '未提供 ID'}, 403)
+            if not tids or len(tids) == 0:
+                return make_response({'state': 'fail', 'msg': '未提供教师编号'}, 403)
             ids = ids.split(',')
+            tids = tids.split(',')
 
-            tid = request.values.get('tid')
             name = request.values.get('name')
             gend = request.values.get('gender')
             telp = request.values.get('telphone')
             role = request.values.get('role')
 
-            res = make_response({'state': 'fail', 'msg': '修改失败'}, 403)
             if len(ids) == 1: # 单独修改
                 result = db.execute(
                     'UPDATE teacher SET tid=?,name=?,gender=?,telphone=? WHERE id=?',
-                    (tid, name, gend, telp, ids[0])
+                    (tids[0], name, gend, telp, ids[0])
                 )
                 if result:
                     res = make_response({'state': 'ok', 'msg': f'修改成功, 修改 {result} 条数据'}, 200)
+                else:
+                    res = make_response({'state': 'fail', 'msg': f'结果: 修改失败;<br>原因: : {db.last_error}'}, 403)
             else: # 批量修改
-                tids = request.values.get('tids')
-                if not tids or len(tids) == 0:
-                    return make_response({'state': 'fail', 'msg': '未提供教师编号'}, 403)
-                tids = tids.split(',')
-
                 count = 0
                 if gend: # 修改性别
                     list = []
@@ -224,6 +226,8 @@ def teachers():
                     count = result or 0
                 if count:
                     res = make_response({'state': 'ok', 'msg': f'修改成功, 修改 {count} 条数据'}, 200)
+                else:
+                    res = make_response({'state': 'fail', 'msg': f'结果: 修改失败（批量）;<br>原因: : {db.last_error}'}, 403)
         elif action == 'add':
             name, password = request.values.get('name'), request.values.get('password')
             if not name or not password:

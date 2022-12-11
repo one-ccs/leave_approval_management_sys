@@ -6,6 +6,8 @@ import sqlite3
 
 class Database:
     """ 封装数据库操作 """
+    last_error = ''
+
     def __new__(cls, *arg, **kw):
         # 实现单例模式
         if not hasattr(cls, '_instance'):
@@ -27,9 +29,11 @@ class Database:
             if sql[:6].lower() in ('insert', 'delete', 'update'):
                 with connection:
                     result = connection.execute(sql, args).rowcount
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            Database.last_error = e
             result = None
         except sqlite3.Error as e:
+            Database.last_error = e
             raise e
         finally:
             connection.close()
@@ -45,9 +49,11 @@ class Database:
             if sql[:6].lower() in ('insert', 'delete', 'update'):
                 with connection:
                     result = connection.executemany(sql, args).rowcount
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            Database.last_error = e
             result = None
         except sqlite3.Error as e:
+            Database.last_error = e
             raise e
         finally:
             connection.close()
